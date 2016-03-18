@@ -1,0 +1,16 @@
+- hosts: localhost
+  tasks:
+    # - include: install.yml
+
+    - name: install python 3.4
+      apt: pkg={{item}} state=installed
+      with_items:
+        - python3-dev
+        - libxml2-dev
+        - libxslt-dev
+        - zlib1g-dev
+
+    - name: install python lib with pip
+      pip: name={{item}} state=latest executable=pip3
+      with_items:
+        - virtualenv

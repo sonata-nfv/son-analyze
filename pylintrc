@@ -1,0 +1,5 @@
+[MASTER]
+persistent=yes
+
+[MESSAGES CONTROL]
+disable=I0011
