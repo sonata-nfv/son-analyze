@@ -9,31 +9,31 @@ SONATA's Service Platform analysis framework
 
 Ansible & Virtualenv are used to setup the development environment on Ubuntu 14.04:
 * Base packages installation
-.* `sudo ansible-playbook install.yml`
-.* `sudo ansible-playbook dev.install.yml`
+ * `sudo ansible-playbook install.yml`
+ * `sudo ansible-playbook dev.install.yml`
 * Virtualenv environment creation
-.* `virtualenv -p python3 venv`
+ * `virtualenv -p python3 venv`
 * Environment activation
-.* `venv/bin/activate`
-.* (Optional) Environment deactivation
-..* `deactivate`
+ * `venv/bin/activate`
+ * (Optional) Environment deactivation
+  * `deactivate`
 * Dependencies installation
-.* `pip3 install -rrequirements.txt -rdev-requirements.txt`
+ * `pip3 install -rrequirements.txt -rdev-requirements.txt`
 * Installing `son-analyze`
-.* `python setup.py development`
+ * `python setup.py develop`
 
 
 ### Adding/Removing a new dependency
 
 * If the new library is directly used by `son-analyze`:
-.* Add the new library to:
-..* `setup.py`
-..* `requirements.in`
-.* Regenerate the dependencies: `pip-compile requirements.in`
+ * Add the new library to:
+  * `setup.py`
+  * `requirements.in`
+ * Regenerate the dependencies: `pip-compile requirements.in`
 * If the new library is only used for testing, developing:
-.* Add the new library to:
-..* `dev-requirements.in`
-..* Regenerate the dependencies: `pip-compile dev-requirements.in`
+ * Add the new library to:
+  * `dev-requirements.in`
+  * Regenerate the dependencies: `pip-compile dev-requirements.in`
 
 
 ### Tests and checks
@@ -43,10 +43,10 @@ The code is checked and tested by [flake8](https://flake8.readthedocs.org/en/lat
 Inside a virtualenv environment:
 * To Launch all the test: `scripts/all.py`
 * Only launch a specific tool globally or on specific files:
-** flake8: `scripts/flake8.sh`
-** pylint: `scripts/pylint.sh setup.py`
-** mypy: `scripts/mypy.sh setup.py src/son/analyze/cli/main.py`
-** py.test: `scripts/py.test.sh`
+ * flake8: `scripts/flake8.sh`
+ * pylint: `scripts/pylint.sh setup.py`
+ * mypy: `scripts/mypy.sh setup.py src/son/analyze/cli/main.py`
+ * py.test: `scripts/py.test.sh`
 
 You can also directly use these tools. 
 
