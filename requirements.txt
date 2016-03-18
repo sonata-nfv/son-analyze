@@ -6,3 +6,4 @@
 #
 pyaml==15.8.2
 PyYAML==3.11              # via pyaml
+typing==3.5.0.1

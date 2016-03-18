@@ -39,6 +39,7 @@ setup(
     packages=find_packages('src'),
     install_requires=[
         'pyaml >= 15.8.0, < 16.0.0',
+        'typing >= 3.5.0.1',
     ],
     zip_safe=False,
     entry_points={
