@@ -14,7 +14,7 @@ Ansible & Virtualenv are used to setup the development environment on Ubuntu 14.
 * Virtualenv environment creation
  * `virtualenv -p python3 venv`
 * Environment activation
- * `venv/bin/activate`
+ * `source venv/bin/activate`
  * (Optional) Environment deactivation
   * `deactivate`
 * Dependencies installation
