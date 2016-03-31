@@ -40,6 +40,7 @@ setup(
     install_requires=[
         'pyaml >= 15.8.0, < 16.0.0',
         'typing >= 3.5.0.1',
+        'docker-py >= 1.7.0',
     ],
     zip_safe=False,
     entry_points={
@@ -51,4 +52,6 @@ setup(
         'pytest >= 2.9.0',
         'flake8 >= 2.5.0',
         'pylint >= 1.5.0',
-    ])
+    ],
+    include_package_data=True
+)
