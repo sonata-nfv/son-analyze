@@ -26,14 +26,22 @@ def bootstrap(_: Namespace) -> None:
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
     cli = Client(base_url='unix://var/run/docker.sock')
-    binds = {}  # type: Dict[str, Dict[str, str]]
+    binds = {  # type: Dict[str, Dict[str, str]]
+        '/dev/random': {
+            'bind': '/dev/random'
+        },
+        '/dev/urandom': {
+            'bind': '/dev/urandom'
+        }
+    }
     if args.dynamic_mount:
-        binds = {
+        new_entry = {
             resource_filename('son.analyze.resources.r', 'son.analyze'): {
                 'bind': '/var/tmp/son.analyze',
                 'mode': 'ro'
             }
         }
+        binds.update(new_entry)
     host_config = cli.create_host_config(port_bindings={8787: 8787},
                                          binds=binds)
     container = cli.create_container(image=_IMAGE_TAG+':latest',
