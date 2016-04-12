@@ -1,7 +1,7 @@
 FROM rocker/rstudio:latest
 
-RUN echo 'to_install <- c("devtools", "roxygen2", "httr", \
-                          "rjson", "ggplot2", "forecast");' >> /tmp/cmds.R \
+RUN echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", \
+                          "rjson", "ggplot2", "forecast", "markovchain");' >> /tmp/cmds.R \
     && echo 'install.packages(to_install);' >> /tmp/cmds.R \
     && cat /tmp/cmds.R | r - \
     && echo 'Done'
