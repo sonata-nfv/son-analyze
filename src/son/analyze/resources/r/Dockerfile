@@ -6,6 +6,7 @@ RUN echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", 
     && cat /tmp/cmds.R | r - \
     && echo 'Done'
 
+COPY ./examples /home/rstudio/examples
 COPY ./son.analyze /var/tmp/son.analyze
 
 RUN echo 'setwd("/var/tmp/son.analyze"); devtools::document(); setwd(".."); devtools::install("son.analyze", build_vignettes =TRUE)' | r - \
