@@ -1,4 +1,4 @@
-FROM rocker/rstudio:latest
+FROM rocker/hadleyverse:latest
 
 RUN echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", \
                           "rjson", "ggplot2", "forecast", "markovchain");' >> /tmp/cmds.R \
