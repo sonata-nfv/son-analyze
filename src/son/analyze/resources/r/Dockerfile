@@ -8,8 +8,8 @@ RUN echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", 
 
 COPY ./son.analyze /var/tmp/son.analyze
 
-RUN chown -R 'rstudio:rstudio' /var/tmp/son.analyze \
-    && echo 'setwd("/var/tmp/son.analyze"); devtools::document(); setwd(".."); devtools::install("son.analyze")' | r -
+RUN echo 'setwd("/var/tmp/son.analyze"); devtools::document(); setwd(".."); devtools::install("son.analyze", build_vignettes =TRUE)' | r - \
+    && chown -R 'rstudio:rstudio' /var/tmp/son.analyze
 
 # RUN echo 'setwd("/var/tmp/son.analyze");' >> /etc/R/Rprofile.site \
 #     && echo 'devtools::document();' >> /etc/R/Rprofile.site \
