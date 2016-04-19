@@ -1,8 +1,11 @@
 FROM rocker/hadleyverse:latest
 
-RUN echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", \
-                          "rjson", "ggplot2", "forecast", "markovchain", "lubridate", \
-                          "zoo", "xts", "som");' >> /tmp/cmds.R \
+ENV TZ='UTC'
+
+RUN echo "TZ='UTC'" >> /usr/lib/R/etc/Renviron \
+    && echo 'to_install <- c("devtools", "roxygen2", "httr", "purrr", "gridExtra", \
+                             "rjson", "ggplot2", "forecast", "markovchain", "lubridate", \
+                             "zoo", "xts", "som");' >> /tmp/cmds.R \
     && echo 'install.packages(to_install);' >> /tmp/cmds.R \
     && cat /tmp/cmds.R | r - \
     && echo 'Done'
