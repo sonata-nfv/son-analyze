@@ -11,6 +11,9 @@ Imports:
   forecast,
   purrr,
   scales,
-  gridExtra
+  gridExtra,
+  httr,
+  lubridate,
+  rjson
 License: Apache License 2.0
 LazyData: true
