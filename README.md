@@ -2,6 +2,24 @@
 
 SONATA's Service Platform analysis framework
 
+## Usage
+
+`son-analyze` creates an environment based on the [R language](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/products/rstudio/).
+
+### Commands
+
+* Start by creating the required image on the host with:
+    * `son-analyze bootstrap`
+        * It will download the official RStudio Docker image and create a new custom Docker image.
+        This new image contains a R Sonata library with its required dependencies.
+        Please note that the base RStudio image ([rocker/hadleyverse](https://hub.docker.com/r/rocker/hadleyverse/)) size is 2,9 GB.
+* Enter the environment with:
+    * `son-analyze run`
+        * This command will start a Docker container.
+    * (Optional) to stop the environment, simply hit `Ctrl-c` in the console.
+    * Browse `http://localhost:8787` and enter the default RStudio credentials (`rstudio/rstudio`).
+    * Some code examples are provided in the `examples` directory (`File > Open File`).
+
 
 ## Development
 
