@@ -12,7 +12,7 @@ NULL
 #' @export
 instantQuery <- function (endpoint, query, time) {
   params <- list(query = query, time = as.double(lubridate::with_tz(time, "UTC")))
-  return(list(url = endpoint, path = "/api/v1/query", params = params))
+  return(list(url = endpoint, path = "api/v1/query", params = params))
 }
 
 
@@ -33,7 +33,7 @@ rangeQuery <- function (endpoint, query, interval, step="30s") {
   start <- as.double(lubridate::with_tz(lubridate::int_start(interval), "UTC"))
   end <- as.double(lubridate::with_tz(lubridate::int_end(interval), "UTC"))
   params <- list(query = query, start = start, end = end, step = step)
-  return(list(url = endpoint, path = "/api/v1/query_range", params = params))
+  return(list(url = endpoint, path = "api/v1/query_range", params = params))
 }
 
 
