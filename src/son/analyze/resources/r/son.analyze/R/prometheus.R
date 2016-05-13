@@ -69,7 +69,7 @@ query <- function (url) {
   rawJson <- httr::content(resp, as = "text", encoding = "UTF-8")
   j <- rjson::fromJSON(rawJson)
   if (j$status != "success") {
-    warning("The GET request to Prometheus failed")
+    warning(paste0("The GET request to Prometheus failed with the message: ", rawJson, " ."))
     return(buildDf(c(), c(), c()))
   }
   if (length(j$data$result) == 0) {
