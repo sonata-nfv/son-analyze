@@ -60,21 +60,31 @@ rangeQuery <- function (endpoint, query, interval, step="30s") {
 #' }
 #' ## End(Not run)
 #' @export
-query <- function (url) {
+query <- function (url, file, silent = FALSE) {
   buildDf <- function (timestamp, value, deltaInSeconds) {
     return(data.frame(Timestamp = timestamp, Value = value, DeltaInSeconds = deltaInSeconds))
   }
-  headers <- httr::add_headers(Accept = "application/json", `Accept-Charset` = "UTF-8")
-  resp <- httr::GET(url$url, headers, path = url$path, query = url$params)
-  rawJson <- httr::content(resp, as = "text", encoding = "UTF-8")
-  j <- rjson::fromJSON(rawJson)
+  if (missing(url)) {
+    if (missing(file))
+      stop("either url or file must be supplied")
+    j <- rjson::fromJSON(file = file)
+  } else {
+    if (! missing(file))
+      stop("only one of url or file must be supplied")
+    headers <- httr::add_headers(Accept = "application/json", `Accept-Charset` = "UTF-8")
+    resp <- httr::GET(url$url, headers, path = url$path, query = url$params)
+    rawJson <- httr::content(resp, as = "text", encoding = "UTF-8")
+    j <- rjson::fromJSON(json_str = rawJson)
+  }
   if (j$status != "success") {
-    warning(paste0("The GET request to Prometheus failed with the message: ", rawJson, " ."))
-    return(buildDf(c(), c(), c()))
+    if (! silent)
+      warning(paste0("The GET request to Prometheus failed with the message: ", rawJson, " ."))
+    return(list())
   }
   if (length(j$data$result) == 0) {
-    warning("The GET request to Prometheus returned an empty result")
-    return(buildDf(c(), c(), c()))
+    if (!silent)
+      warning("The GET request to Prometheus returned an empty result")
+    return(list())
   }
   trans <- function(elt) {
     labels <- elt$metric[-c(match("__name__", names(elt$metric)), match("id", names(elt$metric)))]
