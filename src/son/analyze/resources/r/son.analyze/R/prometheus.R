@@ -40,6 +40,8 @@ rangeQuery <- function (endpoint, query, interval, step="30s") {
 #' Run a query to the Prometheus Api
 #'
 #' @param url A list containing the GET parameters
+#' @param file A cached JSON file's path. Only one of \code{url} or \code{file} must be supplied
+#' @param silent If FALSE then no warnings are emitted
 #' @return a list of named lists \code{l}, each element is a hit returned by Prometheus.
 #'   \code{l[[1]]$metricName}: the name of the queried metric
 #'   \code{l[[1]]$id}: the value of the id label (NULL if not present)
