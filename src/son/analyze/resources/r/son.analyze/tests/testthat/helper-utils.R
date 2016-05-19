@@ -2,6 +2,10 @@ isIntegrationRun <- function() {
   return (Sys.getenv(x = "INTEGRATION_TEST") != "")
 }
 
+makeContextTitle <- function(title) {
+  sprintf("%s (integration mode = %s)", title, isIntegrationRun())
+}
+
 fetch <- function(fixturePath, query, silent = TRUE) {
   if (isIntegrationRun()) {
     son.analyze::query(query, silent = silent)
