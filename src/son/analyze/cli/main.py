@@ -38,7 +38,7 @@ def run(args: Namespace) -> None:
         new_entry = {
             resource_filename('son.analyze.resources.r', 'son.analyze'): {
                 'bind': '/var/tmp/son.analyze',
-                'mode': 'ro'
+                'mode': 'rw'
             }
         }
         binds.update(new_entry)
