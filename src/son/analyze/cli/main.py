@@ -17,9 +17,8 @@ def bootstrap(_: Namespace) -> None:
     cli = Client(base_url='unix://var/run/docker.sock')
     path = resource_filename('son.analyze.resources', 'r')
     for line in cli.build(path=path, tag=_IMAGE_TAG,
-                          dockerfile='Dockerfile', rm=True):
-        print('> ', end="")
-        print(line)
+                          dockerfile='Dockerfile', rm=True, decode=True):
+        print('> ', line["stream"], end="")
     sys.exit(0)
 
 
