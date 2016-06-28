@@ -24,7 +24,10 @@ def bootstrap(_: Namespace) -> None:
     # import pdb; pdb.set_trace()
     for line in cli.build(path=root_context, tag=_IMAGE_TAG,
                           dockerfile=path, rm=True, decode=True):
-        print('> ', line["stream"], end="")
+        if "stream" in line:
+            print('> ', line["stream"], end="")
+        else:
+            print(line)
     sys.exit(0)
 
 
