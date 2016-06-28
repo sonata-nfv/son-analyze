@@ -10,6 +10,16 @@ RUN conda install -y git pyyaml \
 
 WORKDIR /son-analyze
 
+COPY requirements.txt /son-analyze/
+COPY son-scikit/requirements.txt /son-analyze/son-scikit/
+
+RUN cd /son-analyze \
+    && pip install -r requirements.txt \
+    && cd son-scikit \
+    && sed -i 's/^son-analyze/# son-analyze/g' requirements.txt \
+    && pip install -r requirements.txt \
+    && echo 'Done'
+
 COPY . /son-analyze
 
 RUN cd /son-analyze \
