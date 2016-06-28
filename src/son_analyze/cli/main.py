@@ -3,7 +3,8 @@
 import sys
 import os
 import signal
-from argparse import ArgumentParser, Namespace
+import collections
+from argparse import ArgumentParser, Namespace, ArgumentTypeError
 from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
 from typing import List
@@ -97,6 +98,22 @@ def dummy(_: Namespace) -> None:
     sys.exit(1)
 
 
+_ResourceTargetTuple = collections.namedtuple('ResourceTargetTuple', ['name', 'version'])
+
+
+def resource_target(s):
+    try:
+        x, y = map(str, s.split(','))
+        return _ResourceTargetTuple(name=x, version=y)
+    except:
+        raise ArgumentTypeError("Target must have the form: <name>,<version>")
+
+
+def fetch(args: Namespace) -> None:
+    """Fetch data"""
+    sys.exit(0)
+
+
 def dispatch(raw_args: List) -> None:
     """Parse the raw_args and dispatch the control flow"""
     parser = ArgumentParser(description=('An analysis framework '
@@ -126,6 +143,13 @@ def dispatch(raw_args: List) -> None:
                             help=('(Dev) Dynamically mount the R code'
                                   ' inside the environment'))
     parser_run.set_defaults(func=run)
+
+    parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
+    parser_fetch.add_argument('--endpoint', default='', type=str, action='store',
+                              help='A Gatekeeper endpoint')
+    parser_fetch.add_argument('target', nargs=1, type=resource_target,
+                              help='A resource specified by: <name>,<version>')
+    parser_fetch = parser_fetch.set_defaults(func=fetch)
 
     parser_dummy = subparsers.add_parser('dummy', help='Do something dummy')
     parser_dummy.set_defaults(func=dummy)
