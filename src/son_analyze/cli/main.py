@@ -4,6 +4,7 @@ import sys
 import os
 import signal
 import collections
+import urllib.parse
 from argparse import ArgumentParser, Namespace, ArgumentTypeError
 from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
@@ -98,18 +99,30 @@ def dummy(_: Namespace) -> None:
     sys.exit(1)
 
 
-_ResourceTargetTuple = collections.namedtuple('ResourceTargetTuple', ['name', 'version'])
+_ResourceTargetTuple = collections.namedtuple('ResourceTargetTuple',
+                                              ['name', 'version'])
 
 
-def resource_target(s):
+def resource_target(raw_target):
+    """Define the type of resource"""
     try:
-        x, y = map(str, s.split(','))
-        return _ResourceTargetTuple(name=x, version=y)
+        rname, rversion = raw_target.split(',')
+        return _ResourceTargetTuple(name=rname, version=rversion)
     except:
         raise ArgumentTypeError("Target must have the form: <name>,<version>")
 
 
-def fetch(args: Namespace) -> None:
+def url_type(raw_url):
+    """Define the type of a URL"""
+    url = urllib.parse.urlparse(raw_url, scheme='http')
+    isvalid = all(getattr(url, attr) for attr in ['scheme', 'netloc'])
+    if isvalid:
+        return url
+    else:
+        raise ArgumentTypeError("Url is not valid")
+
+
+def fetch(_: Namespace) -> None:
     """Fetch data"""
     sys.exit(0)
 
@@ -145,8 +158,13 @@ def dispatch(raw_args: List) -> None:
     parser_run.set_defaults(func=run)
 
     parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
-    parser_fetch.add_argument('--endpoint', default='', type=str, action='store',
-                              help='A Gatekeeper endpoint')
+    default_val = urllib.parse.urlparse(
+        'http://sp.int2.sonata-nfv.eu:9090', scheme='http')
+    help_msg = 'A Gatekeeper endpoint (default: {})'.format(
+        default_val.geturl())
+    parser_fetch.add_argument('--endpoint', action='store', help=help_msg,
+                              metavar='URL', type=url_type,
+                              default=default_val)
     parser_fetch.add_argument('target', nargs=1, type=resource_target,
                               help='A resource specified by: <name>,<version>')
     parser_fetch = parser_fetch.set_defaults(func=fetch)
