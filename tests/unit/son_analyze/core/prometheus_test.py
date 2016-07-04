@@ -1,6 +1,5 @@
 # pylint: disable=missing-docstring
 import typing  # noqa pylint: disable=unused-import
-#from typing import Dict, Any
 from son_analyze.core import prometheus
 
 

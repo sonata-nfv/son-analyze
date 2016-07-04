@@ -1,7 +1,7 @@
 """functions related to prometheus"""
 
-from typing import Any
 import json
+from typing import Any
 
 
 class PrometheusData:
@@ -30,20 +30,25 @@ class PrometheusData:
             to_update_by_name[elt_id] = elt
             self._by_metric_name[elt_name] = to_update_by_name
 
-    def is_success (self):
+    def is_success(self):
         """Test if the related data is a success or an error
         Returns `True` in case of a success, `False` otherwise
         """
         return self.raw["status"] == 'success'
 
-
-    def get_metric_values(self, name: str, id: str) -> Any:
+    def get_metric_values(self, metric_name: str, target_id: str) -> Any:
+        """Return the `metric_name` metric values corresponding to the
+        `target_id` id component"""
         results = self.raw["data"]["result"]
+
         def somefilter(result):
+            """Filter result and return elements containing the targeted
+            `metric_name` and `target_id` fields"""
             tmp = result['metric']
-            return tmp['__name__'] == name and tmp['id'] == id
+            return tmp['__name__'] == metric_name and tmp['id'] == target_id
+
         targets = [tmp for tmp in results if somefilter(tmp)]
         if len(targets) == 1:
             return targets[0]
         else:
-            None
+            return None

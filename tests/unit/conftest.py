@@ -1,7 +1,8 @@
 # pylint: disable=missing-docstring
+import sys
+import os
 import typing  # noqa pylint: disable=unused-import
-import sys, os
-import pytest
+import pytest  # type: ignore
 
 
 def _read_static_fixtures_file(relative_path: str) -> str:
@@ -10,7 +11,7 @@ def _read_static_fixtures_file(relative_path: str) -> str:
     path = os.path.realpath(os.path.join(sys.modules[__name__].__file__,
                                          '..', 'fixtures',
                                          relative_path))
-    with open(path, 'r') as data_file:    
+    with open(path, 'r') as data_file:
         return data_file.read()
 
 
@@ -22,6 +23,7 @@ def basic_query_01() -> str:
 @pytest.fixture
 def empty_result() -> str:
     return _read_static_fixtures_file('empty_result.json')
+
 
 @pytest.fixture
 def error_result() -> str:
