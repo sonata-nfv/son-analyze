@@ -22,3 +22,7 @@ def basic_query_01() -> str:
 @pytest.fixture
 def empty_result() -> str:
     return _read_static_fixtures_file('empty_result.json')
+
+@pytest.fixture
+def error_result() -> str:
+    return _read_static_fixtures_file('error_result.json')

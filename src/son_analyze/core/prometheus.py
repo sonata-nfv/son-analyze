@@ -20,9 +20,13 @@ class PrometheusData:
         """some_method1"""
         pass
 
-    def some_method2(self):
-        """some_method2"""
-        pass
+
+    def is_success (self):
+        """Test if the related data is a success or an error
+        Returns `True` in case of a success, `False` otherwise
+        """
+        return self.raw["status"] == 'success'
+
 
     def get_metric_values(self, name: str, id: str) -> Any:
         results = self.raw["data"]["result"]
