@@ -19,12 +19,15 @@ class PrometheusData:
 
     def _build_indexes(self) -> None:
         """Create some indexes to provide some search shortcuts over data"""
+        self._by_id = {}
+        self._by_metric_name = {}
         if not self.is_success():
             return
         for elt in self.raw['data']['result']:
             elt_id = elt['metric']['id']
             to_update_by_id = self._by_id.get(elt_id, [])
-            self._by_id[elt_id] = to_update_by_id.append(elt)
+            to_update_by_id.append(elt)
+            self._by_id[elt_id] = to_update_by_id
             elt_name = elt['metric']['__name__']
             to_update_by_name = self._by_metric_name.get(elt_name, {})
             to_update_by_name[elt_id] = elt
