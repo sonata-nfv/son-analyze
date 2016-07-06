@@ -1,7 +1,7 @@
 """functions related to prometheus"""
 
 import json
-from typing import Any
+from typing import Any, Dict
 
 
 class PrometheusData:
@@ -55,3 +55,14 @@ class PrometheusData:
             return targets[0]
         else:
             return None
+
+    def add_entry(self, metric: Dict[str, Any]) -> None:
+        """"""
+        possible_collision = self.get_metric_values(
+            metric['metric']['__name__'],
+            metric['metric']['id'])
+        if possible_collision:
+            possible_collision['values'] += metric['values']
+        else:
+            self.raw['data']['result'].append(metric)
+            self._build_indexes()
