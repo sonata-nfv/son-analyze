@@ -17,6 +17,8 @@ def test_prometheus_data_load(basic_query_01, empty_result,
     assert len(x._by_metric_name) == 1
     assert len(x._by_id[cnt_id]) == 1
     assert len(x._by_id[cnt_id][0]['values']) == 19
+    v = x._by_id[cnt_id][0]['values'][0]
+    assert type(v[1]) == float
     x = prometheus.PrometheusData(empty_result)
     assert x.is_success()
     assert x.raw['data']['result'] == []
