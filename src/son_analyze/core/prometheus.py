@@ -13,9 +13,23 @@ class PrometheusData:
     def __init__(self, raw_json: str) -> None:
         """Constructor from a string containing a json structure"""
         self.raw = json.loads(raw_json)  # Dict[Any, Any]
+        self._rectify_types()
         self._by_id = {}  # type: Dict[str, Any]
         self._by_metric_name = {}  # type: Dict[str, Any]
         self._build_indexes()
+
+    def _rectify_types(self) -> None:
+        """Iterate over the initial data to change to type of some data from
+        str to something else: float, ..."""
+        if not self.is_success():
+            return
+        table = {
+            'cnt_cpu_perc': float
+        }
+        for elt in self.raw['data']['result']:
+            conv = table.get(elt['metric']['__name__'], str)
+            elt['values'] = list(map(lambda val: (val[0], conv(val[1])),
+                                elt['values']))
 
     def _build_indexes(self) -> None:
         """Create some indexes to provide some search shortcuts over data"""
