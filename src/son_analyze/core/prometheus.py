@@ -26,10 +26,10 @@ class PrometheusData:
         table = {
             'cnt_cpu_perc': float
         }
+        conv = None
         for elt in self.raw['data']['result']:
             conv = table.get(elt['metric']['__name__'], str)
-            elt['values'] = list(map(lambda val: (val[0], conv(val[1])),
-                                elt['values']))
+            elt['values'] = [(val[0], conv(val[1])) for val in elt['values']]
 
     def _build_indexes(self) -> None:
         """Create some indexes to provide some search shortcuts over data"""
@@ -70,8 +70,9 @@ class PrometheusData:
         else:
             return None
 
+    # pylint: disable=unsubscriptable-object
     def add_entry(self, metric: Dict[str, Any]) -> None:
-        """"""
+        """Add a new metric"""
         possible_collision = self.get_metric_values(
             metric['metric']['__name__'],
             metric['metric']['id'])

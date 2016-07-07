@@ -11,7 +11,8 @@ def _find_sonanalyze_fixtures() -> str:
     return os.path.join(path, 'tests/unit/fixtures')
 
 
-def _read_static_fixtures_file(relative_path: str, from_sonanalyze=False) -> str:
+def _read_static_fixtures_file(relative_path: str,
+                               from_sonanalyze=False) -> str:
     """Return the content of a fixture file with the relative path
     `relative_path` from the fixtures directory"""
     base = os.path.join(sys.modules[__name__].__file__, '..', 'fixtures')

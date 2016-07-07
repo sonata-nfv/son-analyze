@@ -13,13 +13,16 @@ def convert_timestamp_to_posix(timestamp: str) -> datetime.datetime:
                                            tz=datetime.timezone.utc)
 
 
-def build_sonata_df_by_id(prom_data: PrometheusData) -> Dict[str, pandas.DataFrame]:  # pylint: disable=unsubscriptable-object
+# pylint: disable=unsubscriptable-object
+def build_sonata_df_by_id(prom_data: PrometheusData) -> Dict[str,
+                                                             pandas.DataFrame]:
     """Build a dict of dataframe. Each dataframe contains the values matching
     the corresponding id"""
     # noqa TODO: find the longest metrics and use it as the index. Interpolate the
     # other metric against it before the merge
     result = {}
-    for id_index, all_metrics in prom_data._by_id.items():  # pylint: disable=protected-access
+    items_itr = prom_data._by_id.items()  # pylint: disable=protected-access
+    for id_index, all_metrics in items_itr:
         acc_ts = []
         for elt in all_metrics:
             metric_name = elt['metric']['__name__']

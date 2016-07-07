@@ -32,7 +32,6 @@ def test_prometheus_data_load(basic_query_01, empty_result,
 
 def test_add_metric_entry(basic_query_01) -> None:
     x = prometheus.PrometheusData(basic_query_01)
-    cnt_id = '93a02b23a465d63c3865ed421a437365c464b86e4018f229ee0f91602826b453'
     base_entry = x.raw['data']['result'][0]
     new_entry = copy.deepcopy(base_entry)
     new_entry['metric']['__name__'] = 'foobar'
