@@ -5,6 +5,5 @@ outputs/_output_*
 .tox
 __pycache__
 venv
-devenv
 build
 dist/*.egg
