@@ -15,4 +15,4 @@ run_flake8() {
     fi
 }
 
-run_flake8 ${@:-setup.py scripts/all.py src/son tests}
+run_flake8 ${@:-setup.py scripts/all.py src/son_analyze tests son-scikit/src/son_scikit son-scikit/tests}

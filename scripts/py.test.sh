@@ -16,3 +16,4 @@ run_pytest() {
 }
 
 run_pytest ${@:-tests}
+run_pytest ${@:-son-scikit/tests}

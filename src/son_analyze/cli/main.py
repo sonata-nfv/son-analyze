@@ -1,24 +1,35 @@
 """son-analyze command line tool"""
 
 import sys
+import os
 import signal
-from argparse import ArgumentParser, Namespace
+import collections
+import urllib.parse
+from argparse import ArgumentParser, Namespace, ArgumentTypeError
 from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
 from typing import List
 from docker import Client  # type: ignore
-from son.analyze import __version__
+from son_analyze import __version__
 
-_IMAGE_TAG = 'son-analyze'
+_IMAGE_TAG = 'son-analyze-scikit'
 
 
 def bootstrap(_: Namespace) -> None:
     """Create the images used by son-analyze in the current host"""
     cli = Client(base_url='unix://var/run/docker.sock')
-    path = resource_filename('son.analyze.resources', 'r')
-    for line in cli.build(path=path, tag=_IMAGE_TAG,
-                          dockerfile='Dockerfile', rm=True, decode=True):
-        print('> ', line["stream"], end="")
+    root_context = os.path.realpath(
+        resource_filename('son_analyze.cli', '../../..'))
+    path = resource_filename('son_analyze.cli.resources',
+                             'anaconda.Dockerfile')
+    path = os.path.relpath(path, root_context)
+    # import pdb; pdb.set_trace()
+    for line in cli.build(path=root_context, tag=_IMAGE_TAG,
+                          dockerfile=path, rm=True, decode=True):
+        if "stream" in line:
+            print('> ', line["stream"], end="")
+        else:
+            print(line)
     sys.exit(0)
 
 
@@ -34,18 +45,20 @@ def run(args: Namespace) -> None:
         }
     }
     if args.dynamic_mount:
+        field_name = os.path.realpath(
+            resource_filename('son_analyze.cli', '../../..'))
         new_entry = {
-            resource_filename('son.analyze.resources.r', 'son.analyze'): {
-                'bind': '/var/tmp/son.analyze',
+            field_name: {
+                'bind': '/son-analyze',
                 'mode': 'rw'
             }
         }
         binds.update(new_entry)
-    host_config = cli.create_host_config(port_bindings={8787: 8787},
+    host_config = cli.create_host_config(port_bindings={8888: 8888},
                                          binds=binds)
     container = cli.create_container(image=_IMAGE_TAG+':latest',
                                      labels=['com.sonata.analyze'],
-                                     ports=[8787],
+                                     ports=[8888],
                                      host_config=host_config)
     container_id = container.get('Id')
     cli.start(container=container_id)
@@ -63,8 +76,7 @@ def run(args: Namespace) -> None:
     signal.signal(signal.SIGTERM, signal_term_handler)
     signal.signal(signal.SIGINT, signal_term_handler)
 
-    print('Browse http://localhost:8787 \n'
-          'The default username/password is: rstudio/rstudio\n'
+    print('Browse http://localhost:8888 \n'
           'Type Ctrl-C to exit')
     exit_code = 0
     exit_code = cli.wait(container=container_id)
@@ -85,6 +97,34 @@ def dummy(_: Namespace) -> None:
     """Do something dummy and exit"""
     print('Dummy')
     sys.exit(1)
+
+
+_ResourceTargetTuple = collections.namedtuple('ResourceTargetTuple',
+                                              ['name', 'version'])
+
+
+def resource_target(raw_target):
+    """Define the type of resource"""
+    try:
+        rname, rversion = raw_target.split(',')
+        return _ResourceTargetTuple(name=rname, version=rversion)
+    except:
+        raise ArgumentTypeError("Target must have the form: <name>,<version>")
+
+
+def url_type(raw_url):
+    """Define the type of a URL"""
+    url = urllib.parse.urlparse(raw_url, scheme='http')
+    isvalid = all(getattr(url, attr) for attr in ['scheme', 'netloc'])
+    if isvalid:
+        return url
+    else:
+        raise ArgumentTypeError("Url is not valid")
+
+
+def fetch(_: Namespace) -> None:
+    """Fetch data"""
+    sys.exit(0)
 
 
 def dispatch(raw_args: List) -> None:
@@ -116,6 +156,18 @@ def dispatch(raw_args: List) -> None:
                             help=('(Dev) Dynamically mount the R code'
                                   ' inside the environment'))
     parser_run.set_defaults(func=run)
+
+    parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
+    default_val = urllib.parse.urlparse(
+        'http://sp.int2.sonata-nfv.eu:9090', scheme='http')
+    help_msg = 'A Gatekeeper endpoint (default: {})'.format(
+        default_val.geturl())
+    parser_fetch.add_argument('--endpoint', action='store', help=help_msg,
+                              metavar='URL', type=url_type,
+                              default=default_val)
+    parser_fetch.add_argument('target', nargs=1, type=resource_target,
+                              help='A resource specified by: <name>,<version>')
+    parser_fetch = parser_fetch.set_defaults(func=fetch)
 
     parser_dummy = subparsers.add_parser('dummy', help='Do something dummy')
     parser_dummy.set_defaults(func=dummy)

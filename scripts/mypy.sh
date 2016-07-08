@@ -15,4 +15,4 @@ run_mypy() {
     fi
 }
 
-run_mypy ${@:-setup.py scripts/all.py src/son tests}
+run_mypy ${@:-setup.py scripts/all.py src/son_analyze tests son-scikit/src/son_scikit son-scikit/tests}

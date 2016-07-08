@@ -1,1 +1,7 @@
-recursive-include src/son/analyze/resources *
+recursive-include src/son_analyze/cli/resources *
+recursive-include son-scikit *
+recursive-include tests/unit/fixtures *
+global-exclude __pycache__
+global-exclude *.pyc
+global-exclude *~
+global-exclude .git .cache dist build venv venv3

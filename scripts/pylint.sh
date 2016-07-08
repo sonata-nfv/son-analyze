@@ -15,4 +15,4 @@ run_pylint() {
     fi
 }
 
-run_pylint ${@:-setup.py scripts/all.py src/son tests}
+run_pylint ${@:-setup.py scripts/all.py src/son_analyze tests son-scikit/src/son_scikit son-scikit/tests}
