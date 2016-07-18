@@ -1,8 +1,8 @@
-[![Build Status](http://jenkins.sonata-nfv.eu/buildStatus/icon?job=<JOB_NAME>)](http://jenkins.sonata-nfv.eu/job/<JOB_NAME>/)
+[![Build Status](http://jenkins.sonata-nfv.eu/buildStatus/icon?job=son-analyze)](http://jenkins.sonata-nfv.eu/job/son-analyze/)
 
 # son-analyze
 
-SONATA's Service Platform analysis framework
+SONATA's Service Platform analysis framework. `son-analyze` creates an analysis session to study a service. Inside this session, the end-user can program an analysis on a service's metrics using [pandas](https://pypi.python.org/pypi/pandas). This tools uses [Jupyter](http://jupyter.org/about.html) to offer a ready-to-use web-IDE. It also contains a set of libraries to speak with the Sonata Platform that are automatically installed in the session.
 
 
 ## Development
