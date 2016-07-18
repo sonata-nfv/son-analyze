@@ -29,6 +29,7 @@
 
 import sys
 import os
+import logging
 import signal
 import collections
 import urllib.parse
@@ -39,6 +40,8 @@ from typing import List
 from docker import Client  # type: ignore
 from son_analyze import __version__
 
+
+_LOGGER = logging.getLogger(__name__)
 _IMAGE_TAG = 'son-analyze-scikit'
 
 
@@ -47,9 +50,11 @@ def bootstrap(_: Namespace) -> None:
     cli = Client(base_url='unix://var/run/docker.sock')
     root_context = os.path.realpath(
         resource_filename('son_analyze.cli', '../../..'))
+    _LOGGER.info('The root context path is: %s', root_context)
     path = resource_filename('son_analyze.cli.resources',
                              'anaconda.Dockerfile')
     path = os.path.relpath(path, root_context)
+    _LOGGER.info('The relative path to the bootstrap dockerfile is: %s', path)
     # import pdb; pdb.set_trace()
     for line in cli.build(path=root_context, tag=_IMAGE_TAG,
                           dockerfile=path, rm=True, decode=True):
@@ -159,8 +164,9 @@ def dispatch(raw_args: List) -> None:
     """Parse the raw_args and dispatch the control flow"""
     parser = ArgumentParser(description=('An analysis framework '
                                          'creation tool for Sonata'))
-    parser.add_argument('-v', '--verbose', type=int, default=0,
-                        help='increase verbosity')
+    parser.add_argument('-v', '--verbose', default=logging.WARNING,
+                        action="store_const", dest="logLevel",
+                        const=logging.INFO, help='increase verbosity')
 
     def no_command(_: Namespace) -> None:
         """Print the help usage and exit"""
@@ -201,6 +207,7 @@ def dispatch(raw_args: List) -> None:
     parser_dummy.set_defaults(func=dummy)
 
     args = parser.parse_args(raw_args)
+    logging.basicConfig(level=args.logLevel)
     args.func(args)
     assert False  # this line is impossible to reach
 
