@@ -28,7 +28,7 @@
 """functions related to prometheus"""
 
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Callable
 
 
 class PrometheusData:
@@ -52,10 +52,15 @@ class PrometheusData:
             return
         table = {
             'cnt_cpu_perc': float
-        }
+        }  # type: Dict[str, Callable[[Any], Any]]
+
+        def get_conv(key: str) -> Callable[[Any], Any]:
+            """return a function to convert a value based on the key"""
+            return table.get(key, str)
         conv = None
         for elt in self.raw['data']['result']:
-            conv = table.get(elt['metric']['__name__'], str)
+            conv = get_conv(elt['metric']['__name__'])
+            # conv = table.get(elt['metric']['__name__'], str)
             elt['values'] = [(val[0], conv(val[1])) for val in elt['values']]
 
     def _build_indexes(self) -> None:
