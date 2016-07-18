@@ -57,6 +57,7 @@ def bootstrap(_: Namespace) -> None:
             print('> ', line["stream"], end="")
         else:
             print(line)
+            sys.exit(1)
     sys.exit(0)
 
 
