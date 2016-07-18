@@ -11,6 +11,7 @@ RUN apt-get update \
     && echo 'localhost ansible_connection=local' >> /etc/ansible/hosts \
     # Pre-install python 3.4 and pip3 to speed-up the next steps
     && apt-get install -y python3.4 python3-pip libyaml-dev \
+    && pip3 install -U setuptools \
     && echo 'Done'
 
 WORKDIR /son-analyze
@@ -23,7 +24,5 @@ RUN cd /son-analyze/ansible \
     && cd /son-analyze \
     && ./scripts/clean.sh \
     # Creating the son-analyze wheel
-    && python3.4 setup.py bdist_wheel \
-    # Install the son-analyze package from a local wheel
-    && pip3 install dist/son_analyze-*-py3-*.whl \
+    && python3 setup.py develop \
     && echo 'Done'

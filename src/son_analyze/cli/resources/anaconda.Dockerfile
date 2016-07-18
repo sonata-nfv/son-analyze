@@ -4,7 +4,7 @@ FROM jupyter/base-notebook
 
 USER root
 
-RUN conda install -y git pyyaml \
+RUN conda install -y nomkl git pyyaml pandas \
     # Install common packages, Ansible and Git
     && echo 'Done'
 
