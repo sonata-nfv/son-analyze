@@ -25,10 +25,12 @@
 # partner consortium (www.sonata-nfv.eu).
 
 
-# pylint: disable=missing-docstring
+# noqa pylint: disable=unsubscriptable-object,missing-docstring,redefined-outer-name,invalid-sequence-index
 import sys
 import os
-import typing  # noqa pylint: disable=unused-import
+from urllib.parse import ParseResult, urlparse
+from typing import Dict, Any, List, Tuple
+import yaml  # type: ignore
 import pytest  # type: ignore
 
 
@@ -55,3 +57,50 @@ def empty_result() -> str:
 @pytest.fixture
 def error_result() -> str:
     return _read_static_fixtures_file('error_result.json')
+
+
+@pytest.fixture
+def sonata_demo_nsd_91460c67() -> str:
+    return _read_static_fixtures_file('sonata-demo-nsd.91460c67-d046'
+                                      '-400b-bc34-aadb6514cbfb.yml')
+
+
+@pytest.fixture
+def iperf_vnfd_d0ac3202() -> str:
+    return _read_static_fixtures_file('iperf-vnfd.d0ac3202-3f1c'
+                                      '-412d-b7a8-6d9d0034ec45.yml')
+
+
+@pytest.fixture
+def firewall_vnfd_dce50374() -> str:
+    return _read_static_fixtures_file('firewall-vnfd.dce50374-c4e2'
+                                      '-4902-b6e4-cd23b72e8f19.yml')
+
+
+@pytest.fixture
+def tcpdump_vnfd_18741f2a() -> str:
+    return _read_static_fixtures_file('tcpdump-vnfd.18741f2a-a8d5'
+                                      '-4de2-a3bf-3608bd30d281.yml')
+
+
+@pytest.fixture
+def sonata_demo_mock(
+        sonata_demo_nsd_91460c67,
+        iperf_vnfd_d0ac3202,
+        firewall_vnfd_dce50374,
+        tcpdump_vnfd_18741f2a) -> List[Tuple[ParseResult,
+                                             List[Dict[str, List[Any]]]]]:
+    files = [
+        ('services', yaml.load(sonata_demo_nsd_91460c67)),
+        ('functions', yaml.load(iperf_vnfd_d0ac3202)),
+        ('functions', yaml.load(firewall_vnfd_dce50374)),
+        ('functions', yaml.load(tcpdump_vnfd_18741f2a))
+    ]
+
+    def compute_url(path, val):  # pylint: disable=missing-docstring
+        base = ('http://localhost/mock/{:s}?name={:s}&'
+                'vendor={:s}&version={:s}').format(
+                    path, val['name'], val['vendor'], val['version'])
+        return urlparse(base)
+
+    return [(compute_url(elt[0], elt[1]), [elt[1]]) for elt in files]
