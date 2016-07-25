@@ -104,3 +104,49 @@ def sonata_demo_mock(
         return urlparse(base)
 
     return [(compute_url(elt[0], elt[1]), [elt[1]]) for elt in files]
+
+
+@pytest.fixture
+def firewall_vnfr_9b4663bc() -> str:
+    return _read_static_fixtures_file('firewall-vnfr.9b4663bc-d7af'
+                                      '-40bf-8efe-3dc069b2349f.yml')
+
+
+@pytest.fixture
+def iperf_vnfr_0896785c() -> str:
+    return _read_static_fixtures_file('iperf-vnfr.0896785c-4d6e-4b7f'
+                                      '-acff-44f3b927fa86.yml')
+
+
+@pytest.fixture
+def tcpdump_vnfr_6b64cc54() -> str:
+    return _read_static_fixtures_file('tcpdump-vnfr.6b64cc54-83a7'
+                                      '-4172-9f5f-98b93c5c3a4e.yml')
+
+
+@pytest.fixture
+def sonata_demo_nsr_0295d535() -> str:
+    return _read_static_fixtures_file('sonata-demo-nsr.0295d535-208e'
+                                      '-4a5d-abc6-ca0e06b44d8e.yml')
+
+
+@pytest.fixture
+def sonata_demo_nsr_mock(
+        sonata_demo_nsr_0295d535,
+        iperf_vnfr_0896785c,
+        firewall_vnfr_9b4663bc,
+        tcpdump_vnfr_6b64cc54) -> List[Tuple[ParseResult,
+                                             List[Dict[str, List[Any]]]]]:
+    files = [
+        ('records/nsr', yaml.load(sonata_demo_nsr_0295d535)),
+        ('records/vnfr', yaml.load(iperf_vnfr_0896785c)),
+        ('records/vnfr', yaml.load(firewall_vnfr_9b4663bc)),
+        ('records/vnfr', yaml.load(tcpdump_vnfr_6b64cc54))
+    ]
+
+    def compute_url(path, val):  # pylint: disable=missing-docstring
+        base = ('http://localhost/mock/{:s}/{:s}').format(
+            path, val['id'])
+        return urlparse(base)
+
+    return [(compute_url(elt[0], elt[1]), [elt[1]]) for elt in files]
