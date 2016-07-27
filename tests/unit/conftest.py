@@ -65,7 +65,7 @@ def error_result() -> str:
 
 @pytest.fixture
 def sonata_demo_nsd_91460c67() -> Tuple[str, str]:
-    return ('91460c67-d046-400b-bc34-aadb6514cbf',
+    return ('91460c67-d046-400b-bc34-aadb6514cbfb',
             _read_static_fixtures_file('sonata-demo-nsd.91460c67-d046'
                                        '-400b-bc34-aadb6514cbfb.yml'))
 
