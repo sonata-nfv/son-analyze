@@ -78,7 +78,7 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
             raise
     tmp = res_resp.json()
     if not isinstance(tmp, dict) or len(tmp) <= 0:
-        exc = RuntimeError('The returned json is malformed')
+        exc = RuntimeError('The returned json is malformed:  {}'.format(tmp))
         _LOGGER.error(exc)
         raise exc
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
@@ -93,7 +93,7 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
     url = urljoin(gatekeeper_endpoint.geturl(), path)
-    _LOGGER.info('Fetching a resource at %s', url)
+    _LOGGER.info('Fetching a resource by name at %s', url)
     query_params_raw = {'vendor': vendor,  # Dict[Str, Str]
                         'name': name,
                         'version': version}
@@ -108,6 +108,8 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
         _LOGGER.exception('Failed to retrieve a resource at %s '
                           '(status code = %d)', res_resp.url,
                           res_resp.status_code)
+        # REMARK: if nothing is found, then the API return an empty [] and
+        # not 404
         raise
     tmp = res_resp.json()
     if not isinstance(tmp, list):
