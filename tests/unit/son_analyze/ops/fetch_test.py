@@ -45,3 +45,20 @@ def test_fetch_nsd(caplog, sonata_demo_mock) -> None:
     assert nsd['descriptor_version'] == '1.0'
     assert len(vnfds) == 3
     assert vnfds['vnf_firewall']['descriptor_version'] == 'vnfd-schema-01'
+
+
+def test_fetch_vnfd_by_uuid(caplog, sonata_demo_mock) -> None:
+    caplog.setLevel(logging.DEBUG)
+    with requests_mock.Mocker() as mocker:
+        for (url, value) in sonata_demo_mock:
+            mocker.get(url.geturl(), json=value)
+        mocker.get('http://localhost/mock/'
+                   'functions/c2404aff-cf03-4522-9f9a-80c7d3be6409',
+                   status_code=404, text='Not Found')
+        gate = urllib.parse.urlparse('http://localhost/mock/')
+        vnfd1 = fetch.fetch_vnfd_by_uuid(
+            gate, 'c2404aff-cf03-4522-9f9a-80c7d3be6409')
+        assert not vnfd1
+        vnfd2 = fetch.fetch_vnfd_by_uuid(
+            gate, 'dce50374-c4e2-4902-b6e4-cd23b72e8f19')
+        assert len(vnfd2['description']) == 34
