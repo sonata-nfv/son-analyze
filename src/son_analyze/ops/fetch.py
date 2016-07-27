@@ -27,6 +27,7 @@
 
 """son-analyze fetch operation"""
 
+import os
 import logging
 import collections
 from urllib.parse import ParseResult, urljoin
@@ -57,13 +58,42 @@ class InvalidResourceReferenceError(FetchError):
 
 
 # pylint: disable=unsubscriptable-object
+def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
+                            uuid: str) -> Dict[str, Any]:
+    """Fetch a resource by its uuid. Return `None` if nothing is found.
+    Raise a RuntimeError exception when a error is detected within the
+    gatekeeper's API."""
+    url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
+    _LOGGER.info('Fetching a resource by uuid at %s', url)
+    res_resp = requests.get(url, headers={'content-type': 'application/json'})
+    try:
+        res_resp.raise_for_status()
+    except requests.exceptions.HTTPError as exc_notfound:
+        _LOGGER.exception('Failed to retrieve a resource at %s '
+                          '(status code = %d)', res_resp.url,
+                          res_resp.status_code)
+        if exc_notfound.response.status_code == 404:
+            return None
+        else:
+            raise
+    tmp = res_resp.json()
+    if not isinstance(tmp, dict) or len(tmp) <= 0:
+        exc = RuntimeError('The returned json is malformed:  {}'.format(tmp))
+        _LOGGER.error(exc)
+        raise exc
+    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
+                 res_resp.url, res_resp.status_code)
+    return tmp
+
+
+# pylint: disable=unsubscriptable-object
 def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
                     name: str, version: str) -> Dict[str, Any]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
     url = urljoin(gatekeeper_endpoint.geturl(), path)
-    _LOGGER.info('Fetching a resource at %s', url)
+    _LOGGER.info('Fetching a resource by name at %s', url)
     query_params_raw = {'vendor': vendor,  # Dict[Str, Str]
                         'name': name,
                         'version': version}
@@ -78,6 +108,8 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
         _LOGGER.exception('Failed to retrieve a resource at %s '
                           '(status code = %d)', res_resp.url,
                           res_resp.status_code)
+        # REMARK: if nothing is found, then the API return an empty [] and
+        # not 404
         raise
     tmp = res_resp.json()
     if not isinstance(tmp, list):
@@ -102,12 +134,11 @@ def fetch_vnfd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
 
 
 # pylint: disable=unsubscriptable-object
-def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
-              version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
-    Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
-                          version)
+def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
+                             nsd: Dict[str, Any]) -> Tuple[Dict[str, Any],
+                                                           Dict[str, Any]]:
+    """Retrieve the vnfds mentioned in a nsd. Raise a
+    InvalidResourceReferenceError exception if a vnfd is missing."""
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
     acc = {}  # Dict[str, Any]
     for fun_desc in nsd['network_functions']:
@@ -119,3 +150,31 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
             raise exc
         acc[fun_desc['vnf_id']] = vnfd
     return (nsd, acc)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
+              version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
+    Raise a FileNotFoundError if  """
+    nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
+                          version)
+    return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult,
+                       uuid: str) -> Dict[str, Any]:
+    """Fetch a vnfr by its uuid"""
+    return _fetch_resource_by_uuid(gatekeeper_endpoint, 'functions', uuid)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult,
+                      uuid: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Fetch a nsd by its uuid. Return `None` if not found. Raise a
+    InvalidResourceReferenceError exception is nothing is found."""
+    nsd = _fetch_resource_by_uuid(gatekeeper_endpoint, 'services', uuid)
+    if nsd:
+        return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
+    return None
