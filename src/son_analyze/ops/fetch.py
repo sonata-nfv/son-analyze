@@ -167,3 +167,14 @@ def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult,
                        uuid: str) -> Dict[str, Any]:
     """Fetch a vnfr by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, 'functions', uuid)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult,
+                      uuid: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Fetch a nsd by its uuid. Return `None` if not found. Raise a
+    InvalidResourceReferenceError exception is nothing is found."""
+    nsd = _fetch_resource_by_uuid(gatekeeper_endpoint, 'services', uuid)
+    if nsd:
+        return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
+    return None

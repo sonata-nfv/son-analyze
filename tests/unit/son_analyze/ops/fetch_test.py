@@ -62,3 +62,22 @@ def test_fetch_vnfd_by_uuid(caplog, sonata_demo_mock) -> None:
         vnfd2 = fetch.fetch_vnfd_by_uuid(
             gate, 'dce50374-c4e2-4902-b6e4-cd23b72e8f19')
         assert len(vnfd2['description']) == 34
+
+
+def test_fetch_nfd_by_uuid(caplog, sonata_demo_mock) -> None:
+    caplog.setLevel(logging.DEBUG)
+    with requests_mock.Mocker() as mocker:
+        for (url, value) in sonata_demo_mock:
+            mocker.get(url.geturl(), json=value)
+        mocker.get('http://localhost/mock/'
+                   'services/c2404aff-cf03-4522-9f9a-80c7d3be6409',
+                   status_code=404, text='Not Found')
+        gate = urllib.parse.urlparse('http://localhost/mock/')
+        nsd1 = fetch.fetch_nsd_by_uuid(
+            gate, 'c2404aff-cf03-4522-9f9a-80c7d3be6409')
+        assert not nsd1
+        (nsd2, vnfds2) = fetch.fetch_nsd_by_uuid(
+            gate, '91460c67-d046-400b-bc34-aadb6514cbfb')
+        assert len(nsd2['description']) == 97
+        assert len(vnfds2) == 3
+        assert vnfds2['vnf_iperf']['name'] == 'iperf-vnf'
