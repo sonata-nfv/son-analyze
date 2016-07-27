@@ -32,7 +32,7 @@ import logging
 from urllib.parse import ParseResult
 from typing import Dict, Iterable, Any
 import yaml  # type: ignore
-import son_analyze.ops as ops
+from son_analyze.ops import fetch
 from son_analyze.core import types
 
 
@@ -49,13 +49,19 @@ def fetch_cmd(gatekeeper: ParseResult, kind: str,
     """Fetch a vnfd or a nsd (with its dependencies) and display the result
      as Yaml documents on STDOUT."""
     if kind == 'vnfd':
-        vnfd = ops.fetch.fetch_vnfd(gatekeeper, target.vendor,
+        if target.uuid:
+            vnfd = fetch.fetch_vnfd_by_uuid(gatekeeper, target.uuid)
+        else:
+            vnfd = fetch.fetch_vnfd(gatekeeper, target.vendor,
                                     target.name, target.version)
         _print_yml_to_stdout([vnfd])
     elif kind == 'nsd':
-        (nsd, vnfds) = ops.fetch.fetch_nsd(gatekeeper, target.vendor,
+        if target.uuid:
+            (nsd, vnfds) = fetch.fetch_nsd_by_uuid(gatekeeper, target.uuid)
+        else:
+            (nsd, vnfds) = fetch.fetch_nsd(gatekeeper, target.vendor,
                                            target.name, target.version)
         _print_yml_to_stdout([nsd] + list(vnfds.values()))
     else:
-        raise RuntimeError('Invalid resource type %s', kind)
+        raise RuntimeError('Invalid resource type {}'.format(kind))
     return

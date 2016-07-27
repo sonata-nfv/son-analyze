@@ -32,6 +32,7 @@ import os
 import logging
 import signal
 import urllib.parse
+import uuid
 from argparse import ArgumentParser, Namespace, ArgumentTypeError
 from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
@@ -135,13 +136,22 @@ def dummy(_: Namespace) -> None:
 
 def resource_target(raw_target: str) -> types.ResourceTargetTuple:
     """Define the type of resource"""
-    try:
-        rvendor, rname, rversion = raw_target.split(',')
-        return types.ResourceTargetTuple(vendor=rvendor, name=rname,
-                                         version=rversion, uuid=None)
-    except:
-        raise ArgumentTypeError("Target must have the form: "
-                                "<vendor>,<name>,<version>")
+    if ',' in raw_target:
+        try:
+            rvendor, rname, rversion = raw_target.split(',')
+            return types.ResourceTargetTuple(vendor=rvendor, name=rname,
+                                             version=rversion, uuid=None)
+        except:
+            raise ArgumentTypeError("Target must have the form: "
+                                    "<vendor>,<name>,<version>")
+    else:
+        try:
+            tid = str(uuid.UUID(raw_target))
+            return types.ResourceTargetTuple(vendor=None, name=None,
+                                             version=None, uuid=tid)
+        except:
+            raise ArgumentTypeError("Target uuid must have the form: "
+                                    "<12345678-1234-1234-1234-123456789012>")
 
 
 def url_type(raw_url: str) -> urllib.parse.ParseResult:
@@ -199,11 +209,11 @@ def dispatch(raw_args: List) -> None:
     parser_fetch.add_argument('--endpoint', action='store', help=help_msg,
                               metavar='URL', type=url_type,
                               default=default_val)
-    parser_fetch.add_argument('kind', nargs=1, help="The resource's type",
+    parser_fetch.add_argument('kind', help="The resource's type",
                               type=str, choices=['nsd', 'vnfd'])
-    parser_fetch.add_argument('target', nargs=1, type=resource_target,
+    parser_fetch.add_argument('target', type=resource_target,
                               help=('A resource specified by: '
-                                    '<vendor>,<name>,<version>'))
+                                    '<vendor>,<name>,<version> or <uuid>'))
     parser_fetch = parser_fetch.set_defaults(func=fetch_func)
 
     parser_dummy = subparsers.add_parser('dummy', help='Do something dummy')
