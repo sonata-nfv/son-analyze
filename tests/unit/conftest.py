@@ -120,7 +120,7 @@ def sonata_demo_mock(
     for elt in files:
         urls = compute_urls(elt[0], elt[1], elt[2])
         result.append((urls[0], [elt[2]]))
-        result.append((urls[1], [elt[2]]))
+        result.append((urls[1], elt[2]))
     _LOGGER.debug([elt[0].geturl() for elt in result])
     return result
 
