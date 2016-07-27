@@ -134,12 +134,11 @@ def fetch_vnfd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
 
 
 # pylint: disable=unsubscriptable-object
-def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
-              version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
-    Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
-                          version)
+def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
+                             nsd: Dict[str, Any]) -> Tuple[Dict[str, Any],
+                                                           Dict[str, Any]]:
+    """Retrieve the vnfds mentioned in a nsd. Raise a
+    InvalidResourceReferenceError exception if a vnfd is missing."""
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
     acc = {}  # Dict[str, Any]
     for fun_desc in nsd['network_functions']:
@@ -151,6 +150,16 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
             raise exc
         acc[fun_desc['vnf_id']] = vnfd
     return (nsd, acc)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
+              version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
+    Raise a FileNotFoundError if  """
+    nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
+                          version)
+    return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
 
 
 # pylint: disable=unsubscriptable-object
