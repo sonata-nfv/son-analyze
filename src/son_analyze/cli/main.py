@@ -138,7 +138,7 @@ def resource_target(raw_target: str) -> types.ResourceTargetTuple:
     try:
         rvendor, rname, rversion = raw_target.split(',')
         return types.ResourceTargetTuple(vendor=rvendor, name=rname,
-                                         version=rversion)
+                                         version=rversion, uuid=None)
     except:
         raise ArgumentTypeError("Target must have the form: "
                                 "<vendor>,<name>,<version>")

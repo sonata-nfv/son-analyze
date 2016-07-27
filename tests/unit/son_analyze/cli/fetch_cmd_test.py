@@ -37,7 +37,8 @@ from son_analyze.core import types
 def test_fetch_cmd(capsys, sonata_demo_mock) -> None:
     target = types.ResourceTargetTuple('sonata-demo',
                                        'eu.sonata-nfv.service-descriptor',
-                                       '0.2.1')
+                                       '0.2.1',
+                                       None)
     gate = urlparse('http://localhost/mock/')
     with requests_mock.Mocker() as mocker:
         for (url, value) in sonata_demo_mock:

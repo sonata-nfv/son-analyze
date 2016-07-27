@@ -31,5 +31,8 @@ import collections
 import typing  # noqa pylint: disable=unused-import
 
 
+# Specify a target with the name, vendor, version triplet or by uuid.
+# If uuid is set, then the others fields must be empty, and vice versa.
 ResourceTargetTuple = collections.namedtuple('ResourceTargetTuple',
-                                             ['name', 'vendor', 'version'])
+                                             ['name', 'vendor', 'version',
+                                              'uuid'])
