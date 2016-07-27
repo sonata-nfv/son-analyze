@@ -27,6 +27,7 @@
 
 """son-analyze fetch operation"""
 
+import os
 import logging
 import collections
 from urllib.parse import ParseResult, urljoin
@@ -54,6 +55,35 @@ class InvalidResourceReferenceError(FetchError):
                         'pointing to a non-existing vnfd').format(
                             nsd['vendor'], nsd['name'], nsd['version'],
                             missing_vnf_id)
+
+
+# pylint: disable=unsubscriptable-object
+def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
+                            uuid: str) -> Dict[str, Any]:
+    """Fetch a resource by its uuid. Return `None` if nothing is found.
+    Raise a RuntimeError exception when a error is detected within the
+    gatekeeper's API."""
+    url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
+    _LOGGER.info('Fetching a resource by uuid at %s', url)
+    res_resp = requests.get(url, headers={'content-type': 'application/json'})
+    try:
+        res_resp.raise_for_status()
+    except requests.exceptions.HTTPError as exc_notfound:
+        _LOGGER.exception('Failed to retrieve a resource at %s '
+                          '(status code = %d)', res_resp.url,
+                          res_resp.status_code)
+        if exc_notfound.response.status_code == 404:
+            return None
+        else:
+            raise
+    tmp = res_resp.json()
+    if not isinstance(tmp, dict) or len(tmp) <= 0:
+        exc = RuntimeError('The returned json is malformed')
+        _LOGGER.error(exc)
+        raise exc
+    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
+                 res_resp.url, res_resp.status_code)
+    return tmp
 
 
 # pylint: disable=unsubscriptable-object
