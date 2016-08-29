@@ -128,12 +128,6 @@ def version(args: Namespace) -> None:
     sys.exit(0)
 
 
-def dummy(_: Namespace) -> None:
-    """Do something dummy and exit"""
-    print('Dummy')
-    sys.exit(1)
-
-
 def resource_target(raw_target: str) -> types.ResourceTargetTuple:
     """Define the type of resource"""
     if ',' in raw_target:
@@ -215,9 +209,6 @@ def dispatch(raw_args: List) -> None:
                               help=('A resource specified by: '
                                     '<vendor>,<name>,<version> or <uuid>'))
     parser_fetch = parser_fetch.set_defaults(func=fetch_func)
-
-    parser_dummy = subparsers.add_parser('dummy', help='Do something dummy')
-    parser_dummy.set_defaults(func=dummy)
 
     args = parser.parse_args(raw_args)
     logging.basicConfig(level=args.logLevel)
