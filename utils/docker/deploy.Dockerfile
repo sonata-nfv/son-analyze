@@ -26,3 +26,7 @@ RUN cd /son-analyze/ansible \
     # Creating the son-analyze wheel
     && python3 setup.py develop \
     && echo 'Done'
+
+ENTRYPOINT ["/usr/local/bin/son-analyze"]
+
+CMD ["--help"]
