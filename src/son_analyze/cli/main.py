@@ -89,8 +89,9 @@ def run(args: Namespace) -> None:
             }
         }
         binds.update(new_entry)
-    host_config = cli.create_host_config(port_bindings={8888: 8888},
-                                         binds=binds)
+    host_config = cli.create_host_config(
+        port_bindings={8888: args.jupiter_port},
+        binds=binds)
     container = cli.create_container(image=_IMAGE_TAG+':latest',
                                      labels=['com.sonata.analyze'],
                                      ports=[8888],
@@ -111,8 +112,8 @@ def run(args: Namespace) -> None:
     signal.signal(signal.SIGTERM, signal_term_handler)
     signal.signal(signal.SIGINT, signal_term_handler)
 
-    print('Browse http://localhost:8888 \n'
-          'Type Ctrl-C to exit')
+    print('Browse http://localhost:{} \n'
+          'Type Ctrl-C to exit'.format(args.jupiter_port))
     exit_code = 0
     exit_code = cli.wait(container=container_id)
     cleanup()
@@ -198,6 +199,11 @@ def dispatch(raw_args: List) -> None:
                             action='store_true',
                             help=('(Dev) Dynamically mount the R code'
                                   ' inside the environment'))
+    parser_run.add_argument('--port', type=int,
+                            default=8888, action='store', dest='jupiter_port',
+                            help=('The listening port for the Jupiter '
+                                  'server (default: %(default)d)'))
+
     parser_run.set_defaults(func=run)
 
     parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
