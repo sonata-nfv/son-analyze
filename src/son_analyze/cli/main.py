@@ -47,9 +47,9 @@ _LOGGER = logging.getLogger(__name__)
 _IMAGE_TAG = 'son-analyze-scikit'
 
 
-def bootstrap(_: Namespace) -> None:
+def bootstrap(args: Namespace) -> None:
     """Create the images used by son-analyze in the current host"""
-    cli = Client(base_url='unix://var/run/docker.sock')
+    cli = Client(base_url=args.docker_socket)
     root_context = os.path.realpath(
         resource_filename('son_analyze.cli', '../../..'))
     _LOGGER.info('The root context path is: %s', root_context)
@@ -70,7 +70,7 @@ def bootstrap(_: Namespace) -> None:
 
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
-    cli = Client(base_url='unix://var/run/docker.sock')
+    cli = Client(base_url=args.docker_socket)
     binds = {  # type: Dict[str, Dict[str, str]]
         '/dev/random': {
             'bind': '/dev/random'
@@ -171,6 +171,11 @@ def dispatch(raw_args: List) -> None:
     parser.add_argument('-v', '--verbose', default=logging.WARNING,
                         action="store_const", dest="logLevel",
                         const=logging.INFO, help='increase verbosity')
+    parser.add_argument('--docker-socket', type=str,
+                        default='unix://var/run/docker.sock',
+                        action='store',
+                        help=('An uri to the docker socket '
+                              '(default: %(default)s)'))
 
     def no_command(_: Namespace) -> None:
         """Print the help usage and exit"""
