@@ -47,9 +47,9 @@ _LOGGER = logging.getLogger(__name__)
 _IMAGE_TAG = 'son-analyze-scikit'
 
 
-def bootstrap(_: Namespace) -> None:
+def bootstrap(args: Namespace) -> None:
     """Create the images used by son-analyze in the current host"""
-    cli = Client(base_url='unix://var/run/docker.sock')
+    cli = Client(base_url=args.docker_socket)
     root_context = os.path.realpath(
         resource_filename('son_analyze.cli', '../../..'))
     _LOGGER.info('The root context path is: %s', root_context)
@@ -70,7 +70,7 @@ def bootstrap(_: Namespace) -> None:
 
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
-    cli = Client(base_url='unix://var/run/docker.sock')
+    cli = Client(base_url=args.docker_socket)
     binds = {  # type: Dict[str, Dict[str, str]]
         '/dev/random': {
             'bind': '/dev/random'
@@ -89,8 +89,9 @@ def run(args: Namespace) -> None:
             }
         }
         binds.update(new_entry)
-    host_config = cli.create_host_config(port_bindings={8888: 8888},
-                                         binds=binds)
+    host_config = cli.create_host_config(
+        port_bindings={8888: args.jupiter_port},
+        binds=binds)
     container = cli.create_container(image=_IMAGE_TAG+':latest',
                                      labels=['com.sonata.analyze'],
                                      ports=[8888],
@@ -111,8 +112,8 @@ def run(args: Namespace) -> None:
     signal.signal(signal.SIGTERM, signal_term_handler)
     signal.signal(signal.SIGINT, signal_term_handler)
 
-    print('Browse http://localhost:8888 \n'
-          'Type Ctrl-C to exit')
+    print('Browse http://localhost:{} \n'
+          'Type Ctrl-C to exit'.format(args.jupiter_port))
     exit_code = 0
     exit_code = cli.wait(container=container_id)
     cleanup()
@@ -171,6 +172,11 @@ def dispatch(raw_args: List) -> None:
     parser.add_argument('-v', '--verbose', default=logging.WARNING,
                         action="store_const", dest="logLevel",
                         const=logging.INFO, help='increase verbosity')
+    parser.add_argument('--docker-socket', type=str,
+                        default='unix://var/run/docker.sock',
+                        action='store',
+                        help=('An uri to the docker socket '
+                              '(default: %(default)s)'))
 
     def no_command(_: Namespace) -> None:
         """Print the help usage and exit"""
@@ -193,6 +199,11 @@ def dispatch(raw_args: List) -> None:
                             action='store_true',
                             help=('(Dev) Dynamically mount the R code'
                                   ' inside the environment'))
+    parser_run.add_argument('--port', type=int,
+                            default=8888, action='store', dest='jupiter_port',
+                            help=('The listening port for the Jupiter '
+                                  'server (default: %(default)d)'))
+
     parser_run.set_defaults(func=run)
 
     parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
