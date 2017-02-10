@@ -12,6 +12,7 @@ RUN apt-get update \
     # Pre-install python 3.4 and pip3 to speed-up the next steps
     && apt-get install -y python3.4 python3-pip libyaml-dev \
     && pip3 install -U setuptools \
+    && pip3 install -U docker \
     && echo 'Done'
 
 WORKDIR /son-analyze
