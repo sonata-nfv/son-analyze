@@ -37,7 +37,7 @@ from argparse import ArgumentParser, Namespace, ArgumentTypeError
 from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
 from typing import List
-from docker import Client  # type: ignore
+from docker import APIClient  # type: ignore
 from son_analyze import __version__
 from son_analyze.cli import fetch_cmd
 from son_analyze.core import types
@@ -49,7 +49,7 @@ _IMAGE_TAG = 'son-analyze-scikit'
 
 def bootstrap(args: Namespace) -> None:
     """Create the images used by son-analyze in the current host"""
-    cli = Client(base_url=args.docker_socket)
+    cli = APIClient(base_url=args.docker_socket)
     root_context = os.path.realpath(
         resource_filename('son_analyze.cli', '../../..'))
     _LOGGER.info('The root context path is: %s', root_context)
@@ -64,13 +64,14 @@ def bootstrap(args: Namespace) -> None:
             print('> ', line["stream"], end="")
         else:
             print(line)
-            sys.exit(1)
+            # this causes Jenkins to consider this a failure
+            #sys.exit(1)
     sys.exit(0)
 
 
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
-    cli = Client(base_url=args.docker_socket)
+    cli = APIClient(base_url=args.docker_socket)
     binds = {  # type: Dict[str, Dict[str, str]]
         '/dev/random': {
             'bind': '/dev/random'

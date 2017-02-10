@@ -31,14 +31,14 @@ from multiprocessing import Process
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import requests
-from docker import Client  # type: ignore
+from docker import APIClient  # type: ignore
 import son_analyze.cli.main
 from son_analyze import __version__
 
 
 @pytest.fixture(scope="session")
 def docker_cli():
-    return Client(base_url='unix://var/run/docker.sock')
+    return APIClient(base_url='unix://var/run/docker.sock')
 
 
 def test_version(capsys) -> None:
