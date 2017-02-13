@@ -11,4 +11,4 @@ fi
 
 docker run -i --rm=true  --env="${EXTRA_ENV}" -v "/var/run/docker.sock:/var/run/docker.sock" 'son-analyze-test' -v bootstrap
 
-#docker run -i --rm=true  --env="${EXTRA_ENV}" -v "/var/run/docker.sock:/var/run/docker.sock" -v "$(pwd)/outputs:/son-analyze/outputs" --entrypoint='/bin/bash' 'son-analyze-test' -c "scripts/clean.sh && scripts/all.py"
+docker run -i --rm=true  --env="${EXTRA_ENV}" -v "/var/run/docker.sock:/var/run/docker.sock" -v "$(pwd)/outputs:/son-analyze/outputs" --entrypoint='/bin/bash' 'son-analyze-test' -c "scripts/clean.sh && scripts/all.py"
