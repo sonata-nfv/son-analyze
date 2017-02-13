@@ -4,10 +4,12 @@
 #
 #    pip-compile requirements.in
 #
-docker-py==1.7.2
+backports.ssl-match-hostname==3.5.0.1  # via docker
+docker-pycreds==0.2.1     # via docker
+docker==2.0.2
 pyaml==15.8.2
 PyYAML==3.11              # via pyaml
 requests==2.9.1
-six==1.10.0               # via docker-py, websocket-client
+six==1.10.0               # via docker, docker-pycreds, websocket-client
 typing==3.5.0.1
-websocket-client==0.35.0  # via docker-py
+websocket-client==0.35.0  # via docker
