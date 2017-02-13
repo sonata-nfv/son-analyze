@@ -65,7 +65,7 @@ def bootstrap(args: Namespace) -> None:
         else:
             print(line)
             # this causes Jenkins to consider this a failure
-            #sys.exit(1)
+            # sys.exit(1)
     sys.exit(0)
 
 
