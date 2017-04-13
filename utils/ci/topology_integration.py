@@ -8,7 +8,7 @@ from mininet.node import RemoteController
 from emuvim.api.sonata import SonataDummyGatekeeperEndpoint
 
 
-class SigTermCatcher:
+class SigTermCatcher:  # pylint: disable=too-few-public-methods
 
     def __init__(self, net):
         self.net = net
