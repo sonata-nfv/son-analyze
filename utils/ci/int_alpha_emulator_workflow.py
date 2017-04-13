@@ -26,10 +26,31 @@
 
 
 # pylint: disable=missing-docstring
+import os
+import sys
+import logging
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
+import docker  # type: ignore
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope="module")
+def packages():
+    client = docker.from_env()
+    path = os.path.realpath(os.path.join(
+        sys.modules[__name__].__file__, '..', 'fixtures'))
+    client.images.build(path=path,
+                        tag="integration-sonata",
+                        dockerfile="Dockerfile")
+    _LOGGER.debug("Docker image built")
+    yield None
+    #
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("packages")
 def test_run() -> None:
     assert True
