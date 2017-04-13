@@ -35,7 +35,7 @@ def setup_topology(net):
 
 def main():
     net = DCNetwork(controller=RemoteController, monitor=True, enable_learning=True)
-    s = SigTermCatcher(net)
+    SigTermCatcher(net)
     setup_topology(net)
 
     t = threading.Thread(target=_in_separate_thread, args=(net,))
