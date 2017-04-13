@@ -26,7 +26,7 @@ def _in_separate_thread(net):
 
 
 def setup_topology(net):
-    dc = net.addDatacenter("dc")
+    dc = net.addDatacenter("dc")  # pylint: disable=invalid-name
     # add the SONATA dummy gatekeeper to each DC
     sdkg1 = SonataDummyGatekeeperEndpoint("0.0.0.0", 5000, deploy_sap=True)
     sdkg1.connectDatacenter(dc)
