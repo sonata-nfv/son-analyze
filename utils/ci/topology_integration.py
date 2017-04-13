@@ -35,7 +35,9 @@ def setup_topology(net):
 
 
 def main():
-    net = DCNetwork(controller=RemoteController, monitor=True, enable_learning=True)
+    net = DCNetwork(controller=RemoteController,
+                    monitor=True,
+                    enable_learning=True)
     SigTermCatcher(net)
     setup_topology(net)
 
