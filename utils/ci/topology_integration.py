@@ -39,8 +39,8 @@ def main():
     SigTermCatcher(net)
     setup_topology(net)
 
-    t = threading.Thread(target=_in_separate_thread, args=(net,))
-    t.start()
+    sub_thread = threading.Thread(target=_in_separate_thread, args=(net,))
+    sub_thread.start()
     while True:
         time.sleep(120)
     exit(2)
