@@ -38,13 +38,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="module")
-def packages():
-    client = docker.from_env()
+def docker_client() -> docker.DockerClient:
+    yield docker.from_env()
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
+def packages(docker_client: docker.DockerClient):
     path = os.path.realpath(os.path.join(
         sys.modules[__name__].__file__, '..', 'fixtures'))
-    client.images.build(path=path,
-                        tag="integration-sonata",
-                        dockerfile="Dockerfile")
+    docker_client.images.build(path=path,
+                               tag="integration-sonata",
+                               dockerfile="Dockerfile")
     _LOGGER.debug("Docker image built")
     yield None
     #
