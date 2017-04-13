@@ -24,15 +24,19 @@ def _in_separate_thread(net):
     net.start()
 
 
-def main():
-    net = DCNetwork(controller=RemoteController, monitor=True, enable_learning=True)
-    s = SigTermCatcher(net)
+def setup_topology(net):
     dc = net.addDatacenter("dc")
     # add the SONATA dummy gatekeeper to each DC
     sdkg1 = SonataDummyGatekeeperEndpoint("0.0.0.0", 5000, deploy_sap=True)
     sdkg1.connectDatacenter(dc)
     # run the dummy gatekeeper (in another thread, don't block)
     sdkg1.start()
+
+
+def main():
+    net = DCNetwork(controller=RemoteController, monitor=True, enable_learning=True)
+    s = SigTermCatcher(net)
+    setup_topology(net)
 
     t = threading.Thread(target=_in_separate_thread, args=(net,))
     t.start()
