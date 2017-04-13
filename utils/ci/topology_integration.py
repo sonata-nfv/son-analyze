@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # pylint: disable=missing-docstring
+import sys
 import time
 import signal
 import threading
@@ -16,6 +17,8 @@ class SigTermCatcher:  # pylint: disable=too-few-public-methods
         signal.signal(signal.SIGINT, self.stop_containernet)
 
     def stop_containernet(self, signum, frame):
+        msg = "Catched signal {0!s} on frame {1!s}".format(signum, frame)
+        print >>sys.stderr, msg
         self.net.stop()
         time.sleep(2)
         exit(1)
