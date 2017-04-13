@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# pylint: disable=missing-docstring
 import time
 import signal
 import threading
