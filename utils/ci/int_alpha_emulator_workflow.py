@@ -53,6 +53,30 @@ def son_cli_image(docker_client: docker.DockerClient) -> str:
     return target
 
 
+TYPE_SON_CLI = typing.Callable[[int, typing.List[str]], bytes]
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
+def son_cli(docker_client: docker.DockerClient,
+            son_cli_image: str) -> TYPE_SON_CLI:
+    labels = ["com.sonata.analyze.integration.pytest"]
+
+    def run_in_son_cli(timeout_sec: int, command: typing.List[str]) -> bytes:
+        entrypoint = ["/usr/bin/timeout", "-s", "KILL", str(timeout_sec)]
+        tmp = b""
+        try:
+            tmp = docker_client.containers.run(image=son_cli_image,
+                                               command=command,
+                                               entrypoint=entrypoint,
+                                               labels=labels,
+                                               remove=True)
+        except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
+            pytest.fail("A son-cli command failed: {0!s}".format(cntex))
+        return tmp
+    return run_in_son_cli
+
+
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
 def packages(docker_client: docker.DockerClient):
