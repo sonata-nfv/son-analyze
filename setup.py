@@ -77,7 +77,7 @@ setup(
         ],
     },
     tests_require=[
-        'pytest >= 2.9.0',
+        'pytest >= 3.0.0',
         'flake8 >= 2.5.0',
         'pylint >= 1.5.0',
     ],
