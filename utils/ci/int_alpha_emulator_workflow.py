@@ -44,6 +44,17 @@ def docker_client() -> docker.DockerClient:
 
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
+def son_cli_image(docker_client: docker.DockerClient) -> str:
+    target = "registry.sonata-nfv.eu:5000/son-cli:latest"
+    try:
+        docker_client.images.get(target)
+    except docker.errors.ImageNotFound:
+        pytest.fail("The Docker image {0!s} was not found.".format(target))
+    return target
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
 def packages(docker_client: docker.DockerClient):
     path = os.path.realpath(os.path.join(
         sys.modules[__name__].__file__, '..', 'fixtures'))
