@@ -79,7 +79,7 @@ setup(
     tests_require=[
         'pytest >= 3.0.0',
         'flake8 >= 2.5.0',
-        'pylint >= 1.5.0',
+        'pylint >= 1.7.0',
     ],
     include_package_data=True
 )
