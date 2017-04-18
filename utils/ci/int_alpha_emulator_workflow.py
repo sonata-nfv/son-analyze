@@ -81,7 +81,8 @@ def son_cli(docker_client: docker.DockerClient,
                                                labels=labels,
                                                remove=True,
                                                volumes=volumes,
-                                               working_dir="/root")
+                                               working_dir="/root",
+                                               stderr=True)
         except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
             pytest.fail("A son-cli command failed: {0!s}".format(cntex))
         return tmp
