@@ -29,9 +29,11 @@
 import os
 import sys
 import logging
+import tempfile
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import docker  # type: ignore
+import shutil
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,6 +63,13 @@ TYPE_SON_CLI = typing.Callable[[int, typing.List[str]], bytes]
 def son_cli(docker_client: docker.DockerClient,
             son_cli_image: str) -> TYPE_SON_CLI:
     labels = ["com.sonata.analyze.integration.pytest"]
+    tmp_dir = None
+    with tempfile.TemporaryDirectory(dir="/tmp") as x:
+        tmp_dir = x
+    path = os.path.realpath(os.path.join(
+        sys.modules[__name__].__file__, '..', 'fixtures'))
+    shutil.copytree(path, tmp_dir)
+    volumes = {tmp_dir: {"bind": "/root", "mode": "rw"}}
 
     def run_in_son_cli(timeout_sec: int, command: typing.List[str]) -> bytes:
         entrypoint = ["/usr/bin/timeout", "-s", "KILL", str(timeout_sec)]
@@ -70,7 +79,9 @@ def son_cli(docker_client: docker.DockerClient,
                                                command=command,
                                                entrypoint=entrypoint,
                                                labels=labels,
-                                               remove=True)
+                                               remove=True,
+                                               volumes=volumes,
+                                               working_dir="/root")
         except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
             pytest.fail("A son-cli command failed: {0!s}".format(cntex))
         return tmp
