@@ -65,8 +65,8 @@ def _son_cli(docker_client: docker.DockerClient,
              son_cli_image: str) -> TYPE_SON_CLI:
     labels = ["com.sonata.analyze.integration.pytest"]
     tmp_dir = None
-    with tempfile.TemporaryDirectory(dir="/tmp") as x:
-        tmp_dir = x
+    with tempfile.TemporaryDirectory(dir="/tmp") as cur_path:
+        tmp_dir = cur_path
     path = os.path.realpath(os.path.join(
         sys.modules[__name__].__file__, '..', 'fixtures'))
     shutil.copytree(path, tmp_dir)
