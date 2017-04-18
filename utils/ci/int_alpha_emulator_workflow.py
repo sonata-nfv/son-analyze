@@ -30,6 +30,7 @@ import os
 import sys
 import logging
 import tempfile
+import re
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import docker  # type: ignore
@@ -60,8 +61,8 @@ TYPE_SON_CLI = typing.Callable[[int, typing.List[str]], bytes]
 
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
-def son_cli(docker_client: docker.DockerClient,
-            son_cli_image: str) -> TYPE_SON_CLI:
+def _son_cli(docker_client: docker.DockerClient,
+             son_cli_image: str) -> TYPE_SON_CLI:
     labels = ["com.sonata.analyze.integration.pytest"]
     tmp_dir = None
     with tempfile.TemporaryDirectory(dir="/tmp") as x:
@@ -87,6 +88,17 @@ def son_cli(docker_client: docker.DockerClient,
             pytest.fail("A son-cli command failed: {0!s}".format(cntex))
         return tmp
     return run_in_son_cli
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
+def son_cli(_son_cli: TYPE_SON_CLI) -> TYPE_SON_CLI:
+    tmp = _son_cli(30, ["son-workspace", "--init"])
+    if not re.search("Creating workspace at /root/.son-workspace",
+                     tmp.decode()):
+        pytest.fail("Failed to create the workspace: {0!s}"
+                    .format(tmp.decode()))
+    return _son_cli
 
 
 @pytest.fixture(scope="module")
