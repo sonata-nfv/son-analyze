@@ -30,11 +30,11 @@ import os
 import sys
 import logging
 import tempfile
+import shutil
 import re
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import docker  # type: ignore
-import shutil
 
 
 _LOGGER = logging.getLogger(__name__)
