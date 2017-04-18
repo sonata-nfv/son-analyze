@@ -114,6 +114,19 @@ def packages(docker_client: docker.DockerClient):
     #
 
 
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
+def service_packages(son_cli: TYPE_SON_CLI) -> str:
+    tmp = son_cli(60,
+                  ["son-package", "--project", "sonata-integration"]).decode()
+    check = [re.search("Package generated successfully", tmp),
+             re.search("File: /root/eu.sonata-nfv.pack"
+                       "age.sonata-empty-service.0.4.son", tmp)]
+    if not all(check):
+        pytest.fail("Failed to create the service package: {0!s}".format(tmp))
+    return "/root/eu.sonata-nfv.package.sonata-empty-service.0.4.son"
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("packages")
 def test_run() -> None:
