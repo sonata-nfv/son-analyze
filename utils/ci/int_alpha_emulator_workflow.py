@@ -145,14 +145,13 @@ def packages(docker_client: docker.DockerClient):
                                tag="integration-sonata",
                                dockerfile="Dockerfile")
     _LOGGER.debug("Docker image built")
-    yield None
-    #
+    return "integration-sonata"
 
 
 @pytest.fixture(scope="module")
-@pytest.mark.usefixtures("packages")
 # pylint: disable=redefined-outer-name
-def service_packages(son_cli: TYPE_SON_CLI) -> str:
+def service_packages(son_cli: TYPE_SON_CLI, packages) -> str:
+    assert packages is not None
     tmp = son_cli(60,
                   ["son-package", "--project", "sonata-integration"]).decode()
     check = [re.search("Package generated successfully", tmp),
