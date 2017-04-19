@@ -122,6 +122,7 @@ def packages(docker_client: docker.DockerClient):
 
 
 @pytest.fixture(scope="module")
+@pytest.mark.usefixtures("packages")
 # pylint: disable=redefined-outer-name
 def service_packages(son_cli: TYPE_SON_CLI) -> str:
     tmp = son_cli(60,
