@@ -29,9 +29,9 @@
 import os
 import sys
 import logging
-import tempfile
-import shutil
+import tarfile  # type: ignore
 import re
+import io
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import docker  # type: ignore
@@ -70,31 +70,59 @@ def prune_labeled_containers(docker_client: docker.DockerClient,
 # pylint: disable=redefined-outer-name
 def _son_cli(docker_client: docker.DockerClient,
              son_cli_image: str) -> TYPE_SON_CLI:
-    labels = ["com.sonata.analyze.integration.pytest"]
-    tmp_dir = None
-    with tempfile.TemporaryDirectory(dir="/tmp") as cur_path:
-        tmp_dir = cur_path
-    path = os.path.realpath(os.path.join(
-        sys.modules[__name__].__file__, '..', 'fixtures'))
-    shutil.copytree(path, tmp_dir)
-    volumes = {tmp_dir: {"bind": "/root", "mode": "rw"}}
+    label = "com.sonata.analyze.integration.pytest"
+    prune_labeled_containers(docker_client, label)
+    cnt = None
+    entrypoint = ["/usr/bin/tail", "-s", "600", "-F", "/dev/null"]
+    try:
+        cnt = docker_client.containers.run(image=son_cli_image,
+                                           command=[],
+                                           entrypoint=entrypoint,
+                                           labels=[label],
+                                           # remove=True,
+                                           # volumes=volumes,
+                                           working_dir="/root",
+                                           stderr=True,
+                                           detach=True)
+    except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
+        prune_labeled_containers(docker_client, label)
+        pytest.fail("Failure when initiating son-cli: {0!s}".format(cntex))
+    with io.BytesIO() as tarstream:
+        base = os.path.realpath(os.path.join(
+            sys.modules[__name__].__file__,
+            '..',
+            'fixtures/sonata-integration'))
+        (root, target) = os.path.split(base)
+        tar = tarfile.TarFile(fileobj=tarstream, mode='w')
+        org = os.getcwd()
+        os.chdir(root)
+        tar.add(target)
+        tar.close()
+        os.chdir(org)
+        tarstream.seek(0)
+        try:
+            put_res = cnt.put_archive("/root", tarstream)
+            if not put_res:
+                cnt.remove(force=True)
+                pytest.fail("Invalid result when copying"
+                            " the service package sources")
+        except docker.errors.APIError as putex:
+            cnt.remove(force=True)
+            pytest.fail("Low level failure when copying the "
+                        "service package sources: {0!s}".format(putex))
 
     def run_in_son_cli(timeout_sec: int, command: typing.List[str]) -> bytes:
-        entrypoint = ["/usr/bin/timeout", "-s", "KILL", str(timeout_sec)]
-        tmp = b""
+        entrypoint = (["/usr/bin/timeout", "-s", "KILL", str(timeout_sec)] +
+                      command)
+        tmp = b""  # type: bytes
         try:
-            tmp = docker_client.containers.run(image=son_cli_image,
-                                               command=command,
-                                               entrypoint=entrypoint,
-                                               labels=labels,
-                                               remove=True,
-                                               volumes=volumes,
-                                               working_dir="/root",
-                                               stderr=True)
-        except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
-            pytest.fail("A son-cli command failed: {0!s}".format(cntex))
+            tmp = cnt.exec_run(cmd=entrypoint)
+        except docker.errors.APIError as runex:
+            pytest.fail("A son-cli command failed: {0!s}".format(runex))
         return tmp
-    return run_in_son_cli
+
+    yield run_in_son_cli
+    cnt.remove(force=True)
 
 
 @pytest.fixture(scope="module")
