@@ -69,7 +69,7 @@ def prune_labeled_containers(docker_client: docker.DockerClient,
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
 def _son_cli(docker_client: docker.DockerClient,
-             son_cli_image: str) -> TYPE_SON_CLI:
+             son_cli_image: str) -> typing.Iterator[TYPE_SON_CLI]:
     label = "com.sonata.analyze.integration.pytest"
     prune_labeled_containers(docker_client, label)
     cnt = None
