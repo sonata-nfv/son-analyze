@@ -138,7 +138,7 @@ def son_cli(_son_cli: TYPE_SON_CLI) -> TYPE_SON_CLI:
 
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
-def packages(docker_client: docker.DockerClient):
+def vnf_image(docker_client: docker.DockerClient):
     path = os.path.realpath(os.path.join(
         sys.modules[__name__].__file__, '..', 'fixtures'))
     docker_client.images.build(path=path,
@@ -150,8 +150,8 @@ def packages(docker_client: docker.DockerClient):
 
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
-def service_packages(son_cli: TYPE_SON_CLI, packages) -> str:
-    assert packages is not None
+def service_packages(son_cli: TYPE_SON_CLI, vnf_image) -> str:
+    assert vnf_image is not None
     tmp = son_cli(60,
                   ["son-package", "--project", "sonata-integration"]).decode()
     check = [re.search("Package generated successfully", tmp),
