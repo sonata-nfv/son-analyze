@@ -163,6 +163,5 @@ def service_packages(son_cli: TYPE_SON_CLI, packages) -> str:
 
 
 @pytest.mark.integration
-@pytest.mark.usefixtures("packages")
 def test_run() -> None:
     assert True
