@@ -59,6 +59,7 @@ def son_cli_image(docker_client: docker.DockerClient) -> str:
 TYPE_SON_CLI = typing.Callable[[int, typing.List[str]], bytes]
 
 
+# pylint: disable=redefined-outer-name
 def prune_labeled_containers(docker_client: docker.DockerClient,
                              label: str) -> None:
     entries = docker_client.containers.list(all=True, filters={"label": label})
