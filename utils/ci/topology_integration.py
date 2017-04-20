@@ -25,7 +25,10 @@ class SigTermCatcher:  # pylint: disable=too-few-public-methods
 
 
 def _in_separate_thread(net):
-    net.start()
+    try:
+        net.start()
+    except Exception as e:
+        print >>sys.stderr, "Ignoring exception in thread: {!s}".format(e)
 
 
 def setup_topology(net):
@@ -52,4 +55,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        msg = "Ignoring exception in the main thread: {!s}".format(e)
+        print >>sys.stderr, msg
