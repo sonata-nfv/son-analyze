@@ -165,5 +165,9 @@ def service_packages(son_cli: TYPE_SON_CLI, vnf_image) -> str:
 
 
 @pytest.mark.integration
-def test_run() -> None:
+# pylint: disable=redefined-outer-name
+def test_run(son_cli: TYPE_SON_CLI, service_packages: str) -> None:
+    assert all(elt is not None for elt in [son_cli, service_packages])
+    son_cli(30, ["son-access", "config", "--platform_id", "emu", "--new",
+                 "--url", "http://127.0.0.1:5000", "--default"])
     assert True
