@@ -143,7 +143,8 @@ def vnf_image(docker_client: docker.DockerClient):
         sys.modules[__name__].__file__, '..', 'fixtures'))
     docker_client.images.build(path=path,
                                tag="integration-sonata",
-                               dockerfile="Dockerfile")
+                               dockerfile="Dockerfile",
+                               rm=True)
     _LOGGER.debug("Docker image built")
     return "integration-sonata"
 
