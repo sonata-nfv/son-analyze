@@ -99,7 +99,10 @@ def run(args: Namespace) -> None:
                                      user='root',
                                      environment=['GRANT_SUDO=yes'],
                                      command=['start-notebook.sh',
-                                              "--NotebookApp.token=''"])
+                                              "--NotebookApp.token=''"
+                                              , ("--NotebookApp."
+                                                 "iopub_data_rate_limit="
+                                                 "10000000000")])
     container_id = container.get('Id')
     cli.start(container=container_id)
 
