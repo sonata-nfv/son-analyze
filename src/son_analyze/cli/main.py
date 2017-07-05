@@ -98,7 +98,8 @@ def run(args: Namespace) -> None:
                                      host_config=host_config,
                                      user='root',
                                      environment=['GRANT_SUDO=yes'],
-                                     command=['start-notebook.sh'])
+                                     command=['start-notebook.sh',
+                                              "--NotebookApp.token=''"])
     container_id = container.get('Id')
     cli.start(container=container_id)
 
