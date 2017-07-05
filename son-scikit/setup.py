@@ -65,10 +65,11 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     install_requires=[
-        'pyaml >= 15.8.0, < 16.0.0',
+        'pyaml >= 16.0.0',
         'typing >= 3.5.0.1',
-        'numpy >= 1.10.0',
-        'son-analyze >= 0.0.1'
+        'numpy >= 1.13.0',
+        'pandas >= 0.20.2',
+        'son-analyze >= 0.0.2'
     ],
     zip_safe=False,
     tests_require=[

@@ -65,10 +65,10 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     install_requires=[
-        'pyaml >= 15.8.0, < 16.0.0',
+        'pyaml >= 16.0.0',
         'typing >= 3.5.0.1',
         'docker >= 2.0.2',
-        'requests >= 2.9.1, < 2.11',
+        'requests >= 2.10.0',
     ],
     zip_safe=False,
     entry_points={
@@ -77,9 +77,9 @@ setup(
         ],
     },
     tests_require=[
-        'pytest >= 2.9.0',
+        'pytest >= 3.0.0',
         'flake8 >= 2.5.0',
-        'pylint >= 1.5.0',
+        'pylint >= 1.7.0',
     ],
     include_package_data=True
 )
