@@ -55,7 +55,7 @@ def build_sonata_df_by_id(prom_data: PrometheusData) -> Dict[str,
             metric_name = elt['metric']['__name__']
             index, data = zip(*elt['values'])
             index = [convert_timestamp_to_posix(z) for z in index]
-            this_serie = pandas.Series(data, index)
+            this_serie = pandas.Series(data, index=index)
             this_serie.name = metric_name
             acc_ts.append(this_serie)
         dataframe = pandas.concat(acc_ts, join='outer', axis=1)
