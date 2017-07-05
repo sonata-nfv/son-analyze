@@ -65,7 +65,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     install_requires=[
-        'pyaml >= 15.8.0, < 16.0.0',
+        'pyaml >= 16.0.0',
         'typing >= 3.5.0.1',
         'docker >= 2.0.2',
         'requests >= 2.9.1, < 2.11',
