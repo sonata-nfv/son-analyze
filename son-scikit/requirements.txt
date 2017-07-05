@@ -4,17 +4,18 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-
-backports.ssl-match-hostname==3.5.0.1  # via docker-py
-docker-py==1.8.1          # via son-analyze
-numpy==1.11.0             # via pandas
-pandas==0.18.1
-pyaml==15.8.2
-python-dateutil==2.5.3    # via pandas
+arrow==0.10.0             # via son-analyze
+backports.ssl-match-hostname==3.5.0.1  # via docker
+docker-pycreds==0.2.1     # via docker
+docker==2.3.0             # via son-analyze
+numpy==1.13.0
+pandas==0.20.2
+pyaml==16.12.2
+python-dateutil==2.5.3    # via arrow, pandas
 pytz==2016.4              # via pandas
-PyYAML==3.11              # via pyaml
-requests==2.10.0          # via docker-py
-six==1.10.0               # via docker-py, python-dateutil, websocket-client
-son-analyze==0.0.1
+pyyaml==3.11              # via pyaml
+requests==2.10.0          # via docker, son-analyze
+six==1.10.0               # via docker, docker-pycreds, python-dateutil, websocket-client
+son-analyze==0.0.2
 typing==3.5.0.1
-websocket-client==0.37.0  # via docker-py
+websocket-client==0.37.0  # via docker
