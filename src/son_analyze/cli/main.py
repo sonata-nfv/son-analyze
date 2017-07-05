@@ -96,6 +96,7 @@ def run(args: Namespace) -> None:
                                      labels=['com.sonata.analyze'],
                                      ports=[8888],
                                      host_config=host_config,
+                                     user='root',
                                      command=['start-notebook.sh'])
     container_id = container.get('Id')
     cli.start(container=container_id)
