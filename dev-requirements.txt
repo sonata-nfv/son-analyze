@@ -23,7 +23,7 @@ pyflakes==1.0.0           # via flake8
 pylint==1.7.0
 pytest-capturelog==0.7
 pytest==3.0.0
-requests==2.9.1           # via requests-mock
+requests==2.10.0          # via requests-mock
 requests_mock==1.0.0
 six==1.10.0               # via astroid, pip-tools, pylint, requests-mock
 tox==2.3.1
