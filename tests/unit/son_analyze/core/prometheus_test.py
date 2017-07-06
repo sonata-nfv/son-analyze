@@ -68,3 +68,16 @@ def test_add_metric_entry(basic_query_01) -> None:
     assert len(x.raw['data']['result']) == 2
     assert x.raw['data']['result'][0]['metric']['__name__'] == 'cnt_cpu_perc'
     assert x.raw['data']['result'][1]['metric']['__name__'] == 'foobar'
+
+
+def test_prometheus_data_medium_cnt_load(
+        mn_empty_vnf1_container_memory_usage_bytes) -> None:
+    x = prometheus.PrometheusData(mn_empty_vnf1_container_memory_usage_bytes)
+    assert x.is_success()
+    metrics = x.get_metric_values('container_memory_usage_bytes',
+                                  ('/docker/e03820a994ddb0322d1'
+                                   '8f1e5bac2a84bb56de08559492a'
+                                   '7858332f0386193766'))
+    assert metrics['metric']['name'] == 'mn.empty_vnf1'
+    assert metrics['metric']['vnf_name'] == 'empty_vnf1'
+    assert(len(metrics['values']) == 10800)
