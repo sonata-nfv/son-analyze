@@ -34,4 +34,4 @@ RUN cd /son-analyze \
 
 WORKDIR /home/jovyan/work
 
-USER jovyan
+USER $NB_USER
