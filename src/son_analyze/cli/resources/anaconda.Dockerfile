@@ -4,7 +4,11 @@ FROM jupyter/base-notebook
 
 USER root
 
-RUN conda install -y nomkl git pyyaml pandas \
+RUN conda install -y icu
+
+RUN conda install -y openblas
+
+RUN conda install -y numpy=1.13.0 pandas=0.20.2 pyaml=16.12.2 nomkl git pyyaml statsmodels scipy cython matplotlib \
     # Install common packages, Ansible and Git
     && echo 'Done'
 
