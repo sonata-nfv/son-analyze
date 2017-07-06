@@ -46,6 +46,8 @@ def test_prometheus_data_load(basic_query_01, empty_result,
     assert len(x._by_id[cnt_id][0]['values']) == 19
     v = x._by_id[cnt_id][0]['values'][0]
     assert type(v[1]) == float
+    assert 'job' in x.get_metric_values('cnt_cpu_perc', cnt_id)['metric']
+    assert 'name' not in x.get_metric_values('cnt_cpu_perc', cnt_id)['metric']
     x = prometheus.PrometheusData(empty_result)
     assert x.is_success()
     assert x.raw['data']['result'] == []
