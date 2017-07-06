@@ -26,10 +26,10 @@ RUN cd /son-analyze \
     && ./scripts/clean.sh \
     && pip install -r requirements.txt \
     && echo 'Local install' \
-    && python3.5 setup.py develop \
+    && python3 setup.py develop \
     && cd son-scikit \
     && pip install -r requirements.txt \
-    && python3.5 setup.py develop \
+    && python3 setup.py develop \
     && echo 'Done'
 
 WORKDIR /home/jovyan/work
