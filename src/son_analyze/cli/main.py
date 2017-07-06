@@ -95,7 +95,14 @@ def run(args: Namespace) -> None:
     container = cli.create_container(image=_IMAGE_TAG+':latest',
                                      labels=['com.sonata.analyze'],
                                      ports=[8888],
-                                     host_config=host_config)
+                                     host_config=host_config,
+                                     user='root',
+                                     environment=['GRANT_SUDO=yes'],
+                                     command=['start-notebook.sh',
+                                              "--NotebookApp.token=''"
+                                              , ("--NotebookApp."
+                                                 "iopub_data_rate_limit="
+                                                 "10000000000")])
     container_id = container.get('Id')
     cli.start(container=container_id)
 

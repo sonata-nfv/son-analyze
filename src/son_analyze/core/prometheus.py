@@ -99,8 +99,7 @@ class PrometheusData:
         targets = [tmp for tmp in results if somefilter(tmp)]
         if len(targets) == 1:
             return targets[0]
-        else:
-            return None
+        return None
 
     # pylint: disable=unsubscriptable-object
     def add_entry(self, metric: Dict[str, Any]) -> None:

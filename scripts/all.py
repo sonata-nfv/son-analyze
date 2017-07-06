@@ -51,9 +51,8 @@ def print_summaries(summaries: List[Tuple[str, int]]) -> None:
         if return_code == 0:
             return '{}  {}: commands succeeded{}'.format(Fore.GREEN,
                                                          name, Style.RESET_ALL)
-        else:
-            return '{}ERROR, {}: commands failed{}'.format(Fore.RED, name,
-                                                           Style.RESET_ALL)
+        return '{}ERROR, {}: commands failed{}'.format(Fore.RED, name,
+                                                       Style.RESET_ALL)
     print('\n{0} summary {0}'.format('_'*35))
     for summary in summaries:
         print(text_summary(*summary))
