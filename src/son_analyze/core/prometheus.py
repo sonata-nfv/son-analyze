@@ -51,7 +51,9 @@ class PrometheusData:
         if not self.is_success():
             return
         table = {
-            'cnt_cpu_perc': float
+            'cnt_cpu_perc': float,
+            'sonemu_rx_count_packets': float,
+            'container_memory_usage_bytes': int
         }  # type: Dict[str, Callable[[Any], Any]]
 
         def get_conv(key: str) -> Callable[[Any], Any]:
