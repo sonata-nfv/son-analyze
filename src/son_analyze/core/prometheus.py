@@ -37,12 +37,13 @@ class PrometheusData:
     query
     """
 
-    def __init__(self, raw_json: str) -> None:
+    def __init__(self, raw_json: str, normalize_name=True) -> None:
         """Constructor from a string containing a json structure"""
         self.raw = json.loads(raw_json)  # Dict[Any, Any]
         self._rectify_types()
         self._by_id = {}  # type: Dict[str, Any]
         self._by_metric_name = {}  # type: Dict[str, Any]
+        self._normalize_name = normalize_name  # type: bool
         self._build_indexes()
 
     def _rectify_types(self) -> None:
@@ -51,7 +52,9 @@ class PrometheusData:
         if not self.is_success():
             return
         table = {
-            'cnt_cpu_perc': float
+            'cnt_cpu_perc': float,
+            'sonemu_rx_count_packets': float,
+            'container_memory_usage_bytes': int
         }  # type: Dict[str, Callable[[Any], Any]]
 
         def get_conv(key: str) -> Callable[[Any], Any]:
@@ -71,6 +74,10 @@ class PrometheusData:
             return
         for elt in self.raw['data']['result']:
             elt_id = elt['metric']['id']
+            if 'vnf_name' not in elt['metric'] and 'name' in elt['metric']:
+                vnf_name = elt['metric']['name']
+                if self._normalize_name and vnf_name.startswith('mn.'):
+                    elt['metric']['vnf_name'] = vnf_name[3:]
             to_update_by_id = self._by_id.get(elt_id, [])
             to_update_by_id.append(elt)
             self._by_id[elt_id] = to_update_by_id
