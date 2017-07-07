@@ -169,3 +169,24 @@ def sonata_demo_nsr_mock(
         return urlparse(base)
 
     return [(compute_url(elt[0], elt[1]), [elt[1]]) for elt in files]
+
+
+@pytest.fixture
+# pylint: disable=invalid-name
+def empty_vnf1_sonemu_rx_count_packets() -> str:
+    path = 'sonemu_metrics/empty_vnf1_sonemu_rx_count_packets_180.json'
+    return _read_static_fixtures_file(path)
+
+
+@pytest.fixture
+# pylint: disable=invalid-name
+def empty_vnf1_sonemu_tx_count_packets() -> str:
+    path = 'sonemu_metrics/empty_vnf1_sonemu_tx_count_packets_180.json'
+    return _read_static_fixtures_file(path)
+
+
+@pytest.fixture
+# pylint: disable=invalid-name
+def mn_empty_vnf1_container_memory_usage_bytes() -> str:
+    path = 'sonemu_metrics/mn.empty_vnf1_container_memory_usage_bytes_180.json'
+    return _read_static_fixtures_file(path)
