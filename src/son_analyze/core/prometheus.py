@@ -73,11 +73,17 @@ class PrometheusData:
         if not self.is_success():
             return
         for elt in self.raw['data']['result']:
-            elt_id = elt['metric']['id']
             if 'vnf_name' not in elt['metric'] and 'name' in elt['metric']:
                 vnf_name = elt['metric']['name']
                 if self._normalize_name and vnf_name.startswith('mn.'):
                     elt['metric']['vnf_name'] = vnf_name[3:]
+            if 'vnf_name' in elt['metric']:
+                elt_id = elt['metric']['vnf_name']
+            else:
+                if 'id' not in elt['metric']:
+                    print('Ignoring metric: {0}'.format(elt['metric']))
+                    continue
+                elt_id = elt['metric']['id']
             to_update_by_id = self._by_id.get(elt_id, [])
             to_update_by_id.append(elt)
             self._by_id[elt_id] = to_update_by_id
