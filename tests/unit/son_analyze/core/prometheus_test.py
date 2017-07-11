@@ -81,3 +81,12 @@ def test_prometheus_data_medium_cnt_load(
     assert metrics['metric']['name'] == 'mn.empty_vnf1'
     assert metrics['metric']['vnf_name'] == 'empty_vnf1'
     assert(len(metrics['values']) == 10800)
+
+
+def test_prometheus_data_medium_emu_load(
+        empty_vnf1_sonemu_rx_count_packets) -> None:
+    x = prometheus.PrometheusData(empty_vnf1_sonemu_rx_count_packets)
+    assert x.is_success()
+    metrics = x._by_metric_name['sonemu_rx_count_packets']
+    print(metrics)
+    assert(len(metrics['empty_vnf1']['values']) == 10800)
