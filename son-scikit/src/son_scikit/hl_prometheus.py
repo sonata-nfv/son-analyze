@@ -59,7 +59,11 @@ def build_sonata_df_by_id(prom_data: PrometheusData) -> Dict[str,
             this_serie.name = metric_name
             acc_ts.append(this_serie)
         dataframe = pandas.concat(acc_ts, join='outer', axis=1)
-        dataframe = dataframe.interpolate(method='time')
+        dataframe.index = pandas.date_range(
+            start=dataframe.index[0],
+            periods=len(dataframe.index),
+            freq='S')
+        dataframe = dataframe.interpolate(method='index')
         # import pdb; pdb.set_trace()
         result[id_index] = dataframe
     return result
