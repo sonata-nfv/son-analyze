@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import warnings
 warnings.simplefilter('ignore', category=FutureWarning)
-from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller  # noqa: E402
 warnings.resetwarnings()
-import statsmodels as smt
+import statsmodels as smt  # noqa: E402
 
 
 def foobar():
@@ -65,6 +65,7 @@ def test_stationarity(dataf):
         ax1.legend(loc='best')
         _ = ax3.plot(rolstd[k], '-', linewidth=0.7, color='black',
                      label='Rolling Std')
+        assert _
         ax3.legend(loc='best')
     fig.suptitle('Results of Dickey-Fuller Test')
     print('Results of Dickey-Fuller Test:')
@@ -79,8 +80,8 @@ def test_stationarity(dataf):
                                  index=['Test Statistic', 'p-value',
                                         '#Lags Used',
                                         'Number of Observations Used'])
-        for key,value in dftest[4].items():
-            dfoutput['Critical Value (%s)'%key] = value
+        for key, value in dftest[4].items():
+            dfoutput['Critical Value (%s)' % key] = value
         adf_results[col] = dfoutput
     tmp = pandas.DataFrame(adf_results)
     print(tmp)
@@ -91,13 +92,14 @@ def autocorrelation_plot(tserie, lags=20):
     fig = plt.figure()
     fig.suptitle('Time Series Analysis Plots for {}'.format(tserie.name))
     layout = (1, 2)
-    tmp = {"acf": [plt.subplot2grid(layout, (0, 0)),
-                   smt.tsa.stattools.acf(tserie, nlags=lags),
-                   "q"],
-           "pacf": [plt.subplot2grid(layout, (0, 1)),
-                    smt.tsa.stattools.pacf(tserie, nlags=lags, method='ols'),
-                    "p"]
-          }
+    tmp = {
+        "acf": [plt.subplot2grid(layout, (0, 0)),
+                smt.tsa.stattools.acf(tserie, nlags=lags),
+                "q"],
+        "pacf": [plt.subplot2grid(layout, (0, 1)),
+                 smt.tsa.stattools.pacf(tserie, nlags=lags, method='ols'),
+                 "p"]
+    }
     z95 = 1.959963984540054
     z99 = 2.5758293035489004
     for k, v in tmp.items():
