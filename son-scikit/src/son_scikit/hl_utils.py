@@ -58,6 +58,6 @@ def interval_to_now(grace_seconds=-10, **kwargs) -> Tuple[Any, Any]:
 
 def smooth_dataframe(dataf: pandas.DataFrame, window=6) -> pandas.DataFrame:
     """Smooth the pandas.DataFrame ``dataf`` corresponding to the ``window``"""
-    return dataf.rolling(center=True, window=window) \
-                .median() \
+    return dataf.rolling(center=False, window=window) \
+                .mean() \
                 .interpolate(limit_direction='both')
