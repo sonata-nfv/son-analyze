@@ -54,4 +54,7 @@ def test_build_sonata_df(basic_query_01):
 
     new_entry3['values'] = [trans(i) for i in new_entry3['values']]
     x.add_entry(new_entry3)
-    hl.build_sonata_df_by_id(x)
+    tmp = hl.build_sonata_df_by_id(x)
+    for _, elt in tmp.items():
+        assert elt.index.freq == 'S'
+        assert any(elt.notnull())
