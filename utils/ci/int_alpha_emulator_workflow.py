@@ -32,6 +32,8 @@ import logging
 import tarfile  # type: ignore
 import re
 import io
+import socket
+import time
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
 import docker  # type: ignore
@@ -67,12 +69,19 @@ def prune_labeled_containers(docker_client: docker.DockerClient,
         cnt.remove(force=True)
 
 
-@pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
-def _son_cli(docker_client: docker.DockerClient,
-             son_cli_image: str) -> typing.Iterator[TYPE_SON_CLI]:
-    label = "com.sonata.analyze.integration.pytest"
-    prune_labeled_containers(docker_client, label)
+def container_is_running(docker_client: docker.DockerClient,
+                         name: str) -> bool:
+    try:
+        docker_client.containers.get(name).status == 'running'
+    except docker.errors.NotFound:
+        return False
+    return True
+
+
+def _create_son_cli_cnt(docker_client: docker.DockerClient,
+                        son_cli_image: str,
+                        label: str) -> docker.models.containers.Container:
     cnt = None
     entrypoint = ["/usr/bin/tail", "-s", "600", "-F", "/dev/null"]
     try:
@@ -84,10 +93,21 @@ def _son_cli(docker_client: docker.DockerClient,
                                            # volumes=volumes,
                                            working_dir="/root",
                                            stderr=True,
-                                           detach=True)
+                                           detach=True,
+                                           network_mode="host")
     except (docker.errors.ContainerError, docker.errors.APIError) as cntex:
         prune_labeled_containers(docker_client, label)
         pytest.fail("Failure when initiating son-cli: {0!s}".format(cntex))
+    return cnt
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
+def _son_cli(docker_client: docker.DockerClient,
+             son_cli_image: str) -> typing.Iterator[TYPE_SON_CLI]:
+    label = "com.sonata.analyze.integration.pytest"
+    prune_labeled_containers(docker_client, label)
+    cnt = _create_son_cli_cnt(docker_client, son_cli_image, label)
     with io.BytesIO() as tarstream:
         base = os.path.realpath(os.path.join(
             sys.modules[__name__].__file__,
@@ -98,6 +118,7 @@ def _son_cli(docker_client: docker.DockerClient,
         org = os.getcwd()
         os.chdir(root)
         tar.add(target)
+        tar.add('msd-sonata_integration.yml')
         tar.close()
         os.chdir(org)
         tarstream.seek(0)
@@ -123,7 +144,20 @@ def _son_cli(docker_client: docker.DockerClient,
         return tmp
 
     yield run_in_son_cli
-    cnt.remove(force=True)
+    cnt.kill()
+    last_ex = None
+    for _ in range(3):
+        try:
+            docker_client.containers.get(cnt.id)
+            cnt.remove(v=True, force=True)
+        except docker.errors.NotFound:
+            last_ex = None
+            break
+        except docker.errors.APIError as putex:
+            last_ex = putex
+        time.sleep(0)
+    if last_ex:
+        raise last_ex  # pylint: disable-msg=raising-bad-type
 
 
 @pytest.fixture(scope="module")
@@ -152,6 +186,16 @@ def vnf_image(docker_client: docker.DockerClient):
 
 @pytest.fixture(scope="module")
 # pylint: disable=redefined-outer-name
+def msd_service() -> str:
+    target = 'msd-sonata_integration.yml'
+    path = os.path.realpath(os.path.join(
+        sys.modules[__name__].__file__, '..', 'fixtures', target))
+    assert os.path.isfile(path)
+    return target  # return the path inside the son-cli container
+
+
+@pytest.fixture(scope="module")
+# pylint: disable=redefined-outer-name
 def service_packages(son_cli: TYPE_SON_CLI, vnf_image) -> str:
     assert vnf_image is not None
     tmp = son_cli(60,
@@ -166,8 +210,62 @@ def service_packages(son_cli: TYPE_SON_CLI, vnf_image) -> str:
 
 @pytest.mark.integration
 # pylint: disable=redefined-outer-name
-def test_run(son_cli: TYPE_SON_CLI, service_packages: str) -> None:
+def test_run(son_cli: TYPE_SON_CLI, service_packages: str,
+             docker_client: docker.DockerClient,
+             msd_service: str) -> None:
     assert all(elt is not None for elt in [son_cli, service_packages])
+    try:
+        assert docker_client.containers.get("grafana")
+        assert docker_client.containers.get("prometheus")
+    except docker.errors.NotFound:
+        pytest.fail("The son-monitor's Docker "
+                    "containers {0!s} were not found.")
+    # server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    path = "/tmp/.sonata_integration.socket"
+    client.connect(path)
+    client.send(b'r')
+    data = client.recv(len('o'))
+    # server.sendto(b'r', path)
+    # (data, _) = server.recvfrom(len('o'))
+    assert data == b'o'
+    client.close()
+    # server.shutdown(socket.SHUT_RDWR)
+    # time.sleep(14)
     son_cli(30, ["son-access", "config", "--platform_id", "emu", "--new",
                  "--url", "http://127.0.0.1:5000", "--default"])
+    for _ in range(20):
+        output = son_cli(30, ["son-access", "-p", "emu", "push",
+                              "--upload", service_packages]).decode()
+        if re.search(r"Upload succeeded \(201\)", output):
+            break
+        time.sleep(1)
+    assert re.search(r"Upload succeeded \(201\)", output)
+    to_search = (lambda x: re.search("\"service_instance_uuid\":", x))
+    for _ in range(5):
+        output = son_cli(30, ["son-access", "-p", "emu", "push",
+                              "--deploy", "latest"]).decode()
+        if to_search(output):
+            break
+        time.sleep(1)
+    assert to_search(output)
+    cnts_running = [False]
+    for _ in range(30):
+        cnts_running = [container_is_running(docker_client, 'mn.empty_vnf1'),
+                        container_is_running(docker_client, 'mn.empty_vnf2'),
+                        container_is_running(docker_client, 'mn.empty_vnf3')]
+        if all(cnts_running):
+            break
+        time.sleep(1)
+    assert all(cnts_running)
+    # output = son_cli(30, ["son-monitor", "msd", "-f", msd_service]).decode()
+    # assert re.search(r"msd metrics installed___", output)
+    # assert re.search("\"service_instance_uuid\":", output)
     assert True
+    # output = son_cli(30, ["son-monitor", "init"])
+    # assert re.search(r"Creating grafana", output)
+    # time.sleep(5)
+    # son_cli(30, ["son-monitor", "interface", "start", "-vnf", "empty_vnf1",
+    #              "-me", "tx_packets"])
+
+    # son-monitor interface start -vnf vnf1 -me tx_packets
