@@ -14,7 +14,7 @@ RUN conda install -y numpy=1.13.0 pandas=0.20.2 pyaml=16.12.2 nomkl git pyyaml s
 
 RUN apt-get update -y && \
     apt-get install -y gcc vim && \
-    pip install pyflux jupyterthemes && \
+    pip install pyflux lesscpy jupyterthemes && \
     jt -t grade3 -T -N -fs 10 -cellw 90% -f dejavu && \
     chown -R $NB_USER /home/jovyan/.local /home/jovyan/.jupyter && \
     pip install ipython>=6.1.0  # jupyterthemes downgrades it
