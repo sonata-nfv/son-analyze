@@ -28,7 +28,10 @@
 """son-analyze batch operations"""
 
 import logging
-from urllib.parse import ParseResult
+from urllib.parse import ParseResult, urljoin
+import datetime
+import requests
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,7 +40,13 @@ _LOGGER = logging.getLogger(__name__)
 def batch_raw_query(prometheus_endpoint: ParseResult,
                     start_timestamp: int,
                     end_timestamp: int,
-                    step: str,
-                    query: str) -> None:
+                    step: datetime.timedelta,
+                    query: str) -> bytes:
     """Retrieve metrics from a Prometheus database"""
-    pass
+    payload = {'query': query,
+               'start': start_timestamp,
+               'end': end_timestamp,
+               'step': '{}s'.format(int(step.total_seconds()))}
+    url = urljoin(prometheus_endpoint.geturl(), 'api/v1/query_range')
+    req = requests.get(url, params=payload)
+    return req.content
