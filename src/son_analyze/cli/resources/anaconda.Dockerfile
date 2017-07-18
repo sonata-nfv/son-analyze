@@ -43,6 +43,8 @@ RUN cd /son-analyze \
     && python3 setup.py develop \
     && echo 'Done'
 
-WORKDIR /home/jovyan/work
-
 USER $NB_USER
+
+RUN cp /son-analyze/son-scikit/src/son_scikit/resources/* /home/jovyan/work/
+
+WORKDIR /home/jovyan/work
