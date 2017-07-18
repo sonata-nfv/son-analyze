@@ -30,10 +30,22 @@
 import logging
 from urllib.parse import ParseResult, urljoin
 import datetime
+from typing import Iterable, List, Tuple
 import requests
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _create_batches(start: int, end: int,
+                    batch_size: int) -> List[Tuple[int, int]]:
+    """Returns a list of interval between ``start`` and ``end``."""
+    basel = range(start, end, batch_size)  # type: Iterable[int]
+    res = list(map(lambda elt: (elt, elt + batch_size - 1), basel))
+    if end % batch_size != 0 and res:
+        subs, _ = res[-1]  # type: Tuple[int, int]
+        res[-1] = subs, subs + (end - start) % batch_size
+    return res
 
 
 # pylint: disable=unused-argument
