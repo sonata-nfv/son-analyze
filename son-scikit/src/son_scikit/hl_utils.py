@@ -30,6 +30,7 @@
 
 import arrow  # type: ignore
 from typing import Any, Tuple  # noqa pylint: disable=unused-import
+import pandas  # type: ignore
 
 
 def reset(arr: Any) -> Any:
@@ -53,3 +54,10 @@ def interval_to_now(grace_seconds=-10, **kwargs) -> Tuple[Any, Any]:
     end = reset(arrow.utcnow().shift(seconds=grace_seconds))
     start = end.shift(**kwargs)
     return start, end.shift(seconds=-1)
+
+
+def smooth_dataframe(dataf: pandas.DataFrame, window=6) -> pandas.DataFrame:
+    """Smooth the pandas.DataFrame ``dataf`` corresponding to the ``window``"""
+    return dataf.rolling(center=False, window=window) \
+                .mean() \
+                .interpolate(limit_direction='both')
