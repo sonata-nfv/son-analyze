@@ -9,7 +9,7 @@ is_ci() {
 run_flake8() {
     >&2 echo -e '*** Running flake8\n'
     if is_ci; then
-        flake8 --format='pylint' --output-file="outputs/_output_flake8.out" $@
+        flake8 --output-file="outputs/_output_flake8.out" $@
     else
         flake8 $@
     fi
