@@ -1,0 +1,45 @@
+---
+service_name: "sonata-ovs-user-service"
+version: "0.1"
+author: "Steven Van Rossem, Ghent University, steven.vanrossem@intec.ugent.be"
+description: "Monitor descriptor for an example service with two chained ubuntu VNFs"
+dashboard: "son-monitor-ovs-user-service"
+vnf_metrics:
+  - metric_type: "cpu"
+    description: "cpu load (%)"
+    vnf_ids:
+      - vnf: "empty_vnf1" 
+      - vnf: "empty_vnf2"
+  # - metric_type: "packet_rate"
+  #   description: "packet rate (packets/sec)"
+  #   vnf_ids:
+  #     - vnf: "empty_vnf1:output"
+  #       direction: "tx"
+  #     - vnf: "empty_vnf2:input"
+  #       direction: "rx"
+##
+## Metrics for an NSD link
+##
+nsd_links:
+  - metric_type: "packet_count"
+    description: "packet_count of links"
+    link_ids:
+      # - description: "link0 tx packets"
+      #   link_id: "generic tx"
+      #   source: "empty_vnf1:output"
+      #   destination: "empty_vnf2:input"
+      #   direction: "tx"
+      - description: "test traffic" 
+        link_id: "link-12"
+        source: "empty_vnf2:input"
+        destination: "empty_vnf1:output"
+        direction: "rx"
+        match: "dl_type=0x0800,ip_proto=6"  
+        # match: "dl_type=0x0800,ip_proto=6,tcp_dst=5201"  
+      - description: "icmpv4 ping echo messages" 
+        link_id: "link-12"
+        source: "empty_vnf1:output"
+        destination: "empty_vnf2:input"
+        direction: "tx"
+        match: "dl_type=0x0800,ip_proto=6" 
+        # match: "dl_type=0x0800,ip_proto=1,icmpv4_type=0" 
