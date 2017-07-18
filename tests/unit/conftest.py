@@ -190,3 +190,17 @@ def empty_vnf1_sonemu_tx_count_packets() -> str:
 def mn_empty_vnf1_container_memory_usage_bytes() -> str:
     path = 'sonemu_metrics/mn.empty_vnf1_container_memory_usage_bytes_180.json'
     return _read_static_fixtures_file(path)
+
+
+@pytest.fixture
+# pylint: disable=invalid-name
+def sonemu_batches_cnt_mem() -> List[str]:
+    filenames = [  # type: List[str]
+        'mn.empty_vnf1_container_memory_usage_bytes_b1.json',
+        'mn.empty_vnf1_container_memory_usage_bytes_b2.json',
+        'mn.empty_vnf1_container_memory_usage_bytes_b3.json'
+    ]
+    filepaths = map(lambda x: os.path.join('batch_sonemu_metrics', x),
+                    filenames)
+    filecontents = map(_read_static_fixtures_file, filepaths)
+    return list(filecontents)
