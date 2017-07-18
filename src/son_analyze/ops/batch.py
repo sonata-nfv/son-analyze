@@ -49,16 +49,27 @@ def _create_batches(start: int, end: int,
 
 
 # pylint: disable=unused-argument
+# pylint: disable=too-many-arguments
 def batch_raw_query(prometheus_endpoint: ParseResult,
                     start_timestamp: int,
                     end_timestamp: int,
                     step: datetime.timedelta,
-                    query: str) -> bytes:
+                    query: str,
+                    maxpts=11000) -> Iterable[bytes]:
     """Retrieve metrics from a Prometheus database"""
-    payload = {'query': query,
-               'start': start_timestamp,
-               'end': end_timestamp,
-               'step': '{}s'.format(int(step.total_seconds()))}
+    sstep = '{}s'.format(int(step.total_seconds()))
     url = urljoin(prometheus_endpoint.geturl(), 'api/v1/query_range')
-    req = requests.get(url, params=payload)
-    return req.content
+
+    def sub(sub_start, sub_end):
+        """sub"""
+        payload = [('start', sub_start),
+                   ('end', sub_end),
+                   ('step', sstep),
+                   ('query', query)]
+        req = requests.get(url, params=payload)
+        return req.content
+    delta = end_timestamp - start_timestamp
+    batch_size = min(delta // int(step.total_seconds()), maxpts)  # type: int
+    for limits in _create_batches(start_timestamp, end_timestamp, batch_size):
+        sub_start, sub_end = limits
+        yield sub(sub_start, sub_end)
