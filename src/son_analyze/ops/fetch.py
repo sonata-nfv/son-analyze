@@ -28,6 +28,7 @@
 """son-analyze fetch operation"""
 
 import os
+from enum import Enum
 import logging
 import collections
 from urllib.parse import ParseResult, urljoin
@@ -63,6 +64,11 @@ def _get_workspace_token() -> str:
     path = os.path.join(home, '.son-workspace', 'platforms', 'token.txt')
     with open(path) as tkn:
         return tkn.read()
+
+
+class _Kind(Enum):
+    nsd = 1
+    vnfd = 2
 
 
 # pylint: disable=unsubscriptable-object
