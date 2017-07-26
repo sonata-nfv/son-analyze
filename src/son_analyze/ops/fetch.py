@@ -175,7 +175,9 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
     Raise a FileNotFoundError if  """
     nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
                           version)
-    return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
+    if nsd:
+        return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
+    return nsd, {}
 
 
 # pylint: disable=unsubscriptable-object
