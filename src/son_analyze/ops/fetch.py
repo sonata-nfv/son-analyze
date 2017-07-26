@@ -101,13 +101,13 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
 
 
 # pylint: disable=unsubscriptable-object
-def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
-                    name: str, version: str) -> Dict[str, Any]:
+def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
+                    vendor: str, name: str, version: str) -> Dict[str, Any]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
     url = urljoin(gatekeeper_endpoint.geturl(), path)
-    _LOGGER.info('Fetching a resource by name at %s', url)
+    _LOGGER.info('Fetching a %s resource by name at %s', kind, url)
     query_params_raw = {'vendor': vendor,  # Dict[Str, Str]
                         'name': name,
                         'version': version}
@@ -135,9 +135,11 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
                  res_resp.url, res_resp.status_code)
     for elt in tmp:
-        if all([elt['vendor'] == vendor, elt['name'] == name,
-                elt['version'] == version]):
-            return elt
+        if kind.name in elt:
+            elt = elt[kind.name]
+            if all([elt['vendor'] == vendor, elt['name'] == name,
+                    elt['version'] == version]):
+                return elt
     return None
 
 
@@ -145,8 +147,8 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
 def fetch_vnfd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
                version: str) -> Dict[str, Any]:
     """Fetch a Vnfd. Return `None` if nothing is found."""
-    return _fetch_resource(gatekeeper_endpoint, 'functions', vendor, name,
-                           version)
+    return _fetch_resource(gatekeeper_endpoint, _Kind.vnfd, 'functions',
+                           vendor, name, version)
 
 
 # pylint: disable=unsubscriptable-object
@@ -173,8 +175,8 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
               version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
     Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, 'services', vendor, name,
-                          version)
+    nsd = _fetch_resource(gatekeeper_endpoint, _Kind.nsd, 'services', vendor,
+                          name, version)
     if nsd:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
     return nsd, {}
