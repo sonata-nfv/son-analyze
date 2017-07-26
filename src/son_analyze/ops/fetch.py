@@ -114,8 +114,10 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, path: str, vendor: str,
     # We force the order of the query's parameters to lower the impact on tests
     # when a key is added or removed
     query_params = collections.OrderedDict(sorted(query_params_raw.items()))
+    auth = 'Bearer ' + _get_workspace_token()
     res_resp = requests.get(url, params=query_params,
-                            headers={'content-type': 'application/json'})
+                            headers={'content-type': 'application/json',
+                                     'Authorization': auth})
     try:
         res_resp.raise_for_status()
     except requests.exceptions.HTTPError:
