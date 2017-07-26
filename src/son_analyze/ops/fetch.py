@@ -57,6 +57,14 @@ class InvalidResourceReferenceError(FetchError):
                             missing_vnf_id)
 
 
+def _get_workspace_token() -> str:
+    """Retrieve the authentification token from the workspace"""
+    home = os.path.expanduser('~')
+    path = os.path.join(home, '.son-workspace', 'platforms', 'token.txt')
+    with open(path) as tkn:
+        return tkn.read()
+
+
 # pylint: disable=unsubscriptable-object
 def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
                             uuid: str) -> Dict[str, Any]:
