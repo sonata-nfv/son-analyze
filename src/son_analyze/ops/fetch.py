@@ -79,7 +79,9 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
     gatekeeper's API."""
     url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
     _LOGGER.info('Fetching a resource by uuid at %s', url)
-    res_resp = requests.get(url, headers={'content-type': 'application/json'})
+    auth = 'Bearer ' + _get_workspace_token()
+    res_resp = requests.get(url, headers={'content-type': 'application/json',
+                                          'Authorization': auth})
     try:
         res_resp.raise_for_status()
     except requests.exceptions.HTTPError as exc_notfound:
