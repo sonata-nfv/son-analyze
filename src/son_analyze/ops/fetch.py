@@ -139,9 +139,9 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
     for elt in tmp:
         if kind.name in elt:
             elt = elt[kind.name]
-            if all([elt['vendor'] == vendor, elt['name'] == name,
-                    elt['version'] == version]):
-                return elt
+        if all([elt['vendor'] == vendor, elt['name'] == name,
+                elt['version'] == version]):
+            return elt
     return None
 
 
