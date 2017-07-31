@@ -137,7 +137,7 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d): %s',
                  res_resp.url, res_resp.status_code, tmp[:20])
     for elt in tmp:
-        if kind.name in elt:
+        if kind.name in elt:  # the resource is boxed
             elt = elt[kind.name]
         if all([elt['vendor'] == vendor, elt['name'] == name,
                 elt['version'] == version]):
