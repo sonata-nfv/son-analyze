@@ -41,6 +41,7 @@ from docker import APIClient  # type: ignore
 from son_analyze import __version__
 from son_analyze.cli import fetch_cmd
 from son_analyze.core import types
+from son_analyze.ops.fetch import _Kind
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -221,8 +222,9 @@ def dispatch(raw_args: List) -> None:
     parser_fetch.add_argument('--endpoint', action='store', help=help_msg,
                               metavar='URL', type=url_type,
                               default=default_val)
+    choices = tuple(elt.name for elt in _Kind)  # type: ignore
     parser_fetch.add_argument('kind', help="The resource's type",
-                              type=str, choices=['nsd', 'vnfd'])
+                              type=str, choices=choices)
     parser_fetch.add_argument('target', type=resource_target,
                               help=('A resource specified by: '
                                     '<vendor>,<name>,<version> or <uuid>'))
