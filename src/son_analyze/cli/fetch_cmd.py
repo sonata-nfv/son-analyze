@@ -45,11 +45,18 @@ def _print_yml_to_stdout(values: Iterable[Dict[str, Any]]) -> None:
     print(yaml.dump_all(values))
 
 
+def _not_available(*_):
+    """Dummy function to fill the fetch operation on some kind"""
+    _ = ("Fetching this kind of resource is not possible when using the"
+         "name,vendor,version format")
+    raise RuntimeError(_)
+
+
 class _Dispatcher(Enum):
     vnfd = (fetch.fetch_vnfd_by_uuid, fetch.fetch_vnfd)
     nsd = (fetch.fetch_nsd_by_uuid, fetch.fetch_nsd)
-    vnfr = (fetch.fetch_vnfr_by_uuid, fetch.fetch_vnfr)
-    nsr = (fetch.fetch_nsr_by_uuid, fetch.fetch_nsr)
+    vnfr = (fetch.fetch_vnfr_by_uuid, _not_available)
+    nsr = (fetch.fetch_nsr_by_uuid, _not_available)
 
     def __init__(self, ffetch_by_uuid, ffetch):
         self.fetch_by_uuid = ffetch_by_uuid
