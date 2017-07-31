@@ -79,7 +79,9 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
     gatekeeper's API."""
     url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
     _LOGGER.info('Fetching a resource by uuid at %s', url)
-    res_resp = requests.get(url, headers={'content-type': 'application/json'})
+    auth = 'Bearer ' + _get_workspace_token()
+    res_resp = requests.get(url, headers={'content-type': 'application/json',
+                                          'Authorization': auth})
     try:
         res_resp.raise_for_status()
     except requests.exceptions.HTTPError as exc_notfound:
@@ -132,14 +134,14 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
         exc = RuntimeError('The returned json is not boxed by a list')
         _LOGGER.error(exc)
         raise exc
-    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
-                 res_resp.url, res_resp.status_code)
+    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d): %s',
+                 res_resp.url, res_resp.status_code, tmp[:20])
     for elt in tmp:
-        if kind.name in elt:
+        if kind.name in elt:  # the resource is boxed
             elt = elt[kind.name]
-            if all([elt['vendor'] == vendor, elt['name'] == name,
-                    elt['version'] == version]):
-                return elt
+        if all([elt['vendor'] == vendor, elt['name'] == name,
+                elt['version'] == version]):
+            return elt
     return None
 
 
@@ -185,7 +187,7 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
 # pylint: disable=unsubscriptable-object
 def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult,
                        uuid: str) -> Dict[str, Any]:
-    """Fetch a vnfr by its uuid"""
+    """Fetch a vnfd by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, 'functions', uuid)
 
 
