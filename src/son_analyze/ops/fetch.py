@@ -69,6 +69,7 @@ def _get_workspace_token() -> str:
 class _Kind(Enum):
     nsd = 1
     vnfd = 2
+    vnfr = 3
 
 
 # pylint: disable=unsubscriptable-object
@@ -200,3 +201,11 @@ def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult,
     if nsd:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
     return None
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_vnfr_by_uuid(gatekeeper_endpoint: ParseResult,
+                       uuid: str) -> Dict[str, Any]:
+    """Fetch a vnfr by its uuid"""
+    return _fetch_resource_by_uuid(gatekeeper_endpoint, 'records/functions',
+                                   uuid)
