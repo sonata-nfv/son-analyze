@@ -120,7 +120,7 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
 
 
 # pylint: disable=unsubscriptable-object
-def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
+def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind,
                     vendor: str, name: str, version: str) -> Dict[str, Any]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
@@ -166,7 +166,7 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
 def fetch_vnfd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
                version: str) -> Dict[str, Any]:
     """Fetch a Vnfd. Return `None` if nothing is found."""
-    return _fetch_resource(gatekeeper_endpoint, _Kind.vnfd, 'functions',
+    return _fetch_resource(gatekeeper_endpoint, _Kind.vnfd,
                            vendor, name, version)
 
 
@@ -194,7 +194,7 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
               version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
     Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, _Kind.nsd, 'services', vendor,
+    nsd = _fetch_resource(gatekeeper_endpoint, _Kind.nsd, vendor,
                           name, version)
     if nsd:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, nsd)
