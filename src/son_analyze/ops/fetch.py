@@ -70,6 +70,7 @@ class _Kind(Enum):
     nsd = 1
     vnfd = 2
     vnfr = 3
+    nsr = 4
 
 
 # pylint: disable=unsubscriptable-object
@@ -209,3 +210,13 @@ def fetch_vnfr_by_uuid(gatekeeper_endpoint: ParseResult,
     """Fetch a vnfr by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, 'records/functions',
                                    uuid)
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult,
+                      uuid: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Fetch a nsr by its uuid. Return `None` if not found. Raise a
+    InvalidResourceReferenceError exception is nothing is found."""
+    nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, 'records/services',
+                                  uuid)
+    return nsr, None
