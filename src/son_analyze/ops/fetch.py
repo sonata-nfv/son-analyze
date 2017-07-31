@@ -185,7 +185,7 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, vendor: str, name: str,
 # pylint: disable=unsubscriptable-object
 def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult,
                        uuid: str) -> Dict[str, Any]:
-    """Fetch a vnfr by its uuid"""
+    """Fetch a vnfd by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, 'functions', uuid)
 
 
