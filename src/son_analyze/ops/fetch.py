@@ -134,8 +134,8 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
         exc = RuntimeError('The returned json is not boxed by a list')
         _LOGGER.error(exc)
         raise exc
-    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
-                 res_resp.url, res_resp.status_code)
+    _LOGGER.info('Succeed to retrieve the resource %s (status code = %d): %s',
+                 res_resp.url, res_resp.status_code, tmp[:20])
     for elt in tmp:
         if kind.name in elt:
             elt = elt[kind.name]
