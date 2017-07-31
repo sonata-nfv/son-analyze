@@ -28,6 +28,7 @@
 """son-analyze fetch command"""
 
 # pylint: disable=unsubscriptable-object
+from enum import Enum
 import logging
 from urllib.parse import ParseResult
 from typing import Dict, Iterable, Any
@@ -44,24 +45,33 @@ def _print_yml_to_stdout(values: Iterable[Dict[str, Any]]) -> None:
     print(yaml.dump_all(values))
 
 
-def fetch_cmd(gatekeeper: ParseResult, kind: str,
+class _Dispatcher(Enum):
+    vnfd = (fetch.fetch_vnfd_by_uuid, fetch.fetch_vnfd)
+    nsd = (fetch.fetch_nsd_by_uuid, fetch.fetch_nsd)
+    vnfr = (fetch.fetch_vnfr_by_uuid, fetch.fetch_vnfr)
+    nsr = (fetch.fetch_nsr_by_uuid, fetch.fetch_nsr)
+
+    def __init__(self, ffetch_by_uuid, ffetch):
+        self.fetch_by_uuid = ffetch_by_uuid
+        self.fetch = ffetch
+
+
+def fetch_cmd(gatekeeper: ParseResult, skind: str,
               target: types.ResourceTargetTuple) -> None:
     """Fetch a vnfd or a nsd (with its dependencies) and display the result
      as Yaml documents on STDOUT."""
-    if kind == 'vnfd':
-        if target.uuid:
-            vnfd = fetch.fetch_vnfd_by_uuid(gatekeeper, target.uuid)
-        else:
-            vnfd = fetch.fetch_vnfd(gatekeeper, target.vendor,
-                                    target.name, target.version)
-        _print_yml_to_stdout([vnfd])
-    elif kind == 'nsd':
-        if target.uuid:
-            (nsd, vnfds) = fetch.fetch_nsd_by_uuid(gatekeeper, target.uuid)
-        else:
-            (nsd, vnfds) = fetch.fetch_nsd(gatekeeper, target.vendor,
-                                           target.name, target.version)
-        _print_yml_to_stdout([nsd] + list(vnfds.values()))
+    try:
+        kind = _Dispatcher[skind]  # type: ignore
+    except KeyError:
+        raise RuntimeError('Invalid resource type {}'.format(skind))
+    if target.uuid:
+        res = kind.fetch_by_uuid(gatekeeper, target.uuid)
     else:
-        raise RuntimeError('Invalid resource type {}'.format(kind))
+        res = kind.fetch(gatekeeper, target.vendor, target.name,
+                         target.version)
+    if isinstance(res, tuple):
+        base, docs = res
+        _print_yml_to_stdout([base] + list(docs.values()))
+    else:
+        _print_yml_to_stdout([res])
     return
