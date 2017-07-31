@@ -73,6 +73,21 @@ class _Kind(Enum):
     nsr = 4
 
 
+def _get_path_from_kind(kind: _Kind) -> str:
+    """Return the api path for a given resource kind"""
+    table = {
+        _Kind.nsd: 'services',
+        _Kind.vnfd: 'functions',
+        _Kind.vnfr: 'records/functions',
+        _Kind.nsr: 'records/services'
+    }
+    try:
+        return table[kind]
+    except KeyError:
+        _ = "Cannot compute the fetch api path for {}".format(kind)
+        raise RuntimeError(_)
+
+
 # pylint: disable=unsubscriptable-object
 def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
                             uuid: str) -> Dict[str, Any]:
@@ -110,7 +125,7 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind, path: str,
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
-    url = urljoin(gatekeeper_endpoint.geturl(), path)
+    url = urljoin(gatekeeper_endpoint.geturl(), _get_path_from_kind(kind))
     _LOGGER.info('Fetching a %s resource by name at %s', kind, url)
     query_params_raw = {'vendor': vendor,  # Dict[Str, Str]
                         'name': name,
