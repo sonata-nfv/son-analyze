@@ -99,13 +99,13 @@ def sonata_demo_mock(
         tcpdump_vnfd_18741f2a) -> List[Tuple[ParseResult,
                                              List[Dict[str, List[Any]]]]]:
     files = [
-        ('services', sonata_demo_nsd_91460c67[0],
+        ('services', 'nsd', sonata_demo_nsd_91460c67[0],
          yaml.load(sonata_demo_nsd_91460c67[1])),
-        ('functions', iperf_vnfd_d0ac3202[0],
+        ('functions', 'vnfd', iperf_vnfd_d0ac3202[0],
          yaml.load(iperf_vnfd_d0ac3202[1])),
-        ('functions', firewall_vnfd_dce50374[0],
+        ('functions', 'vnfd', firewall_vnfd_dce50374[0],
          yaml.load(firewall_vnfd_dce50374[1])),
-        ('functions', tcpdump_vnfd_18741f2a[0],
+        ('functions', 'vnfd', tcpdump_vnfd_18741f2a[0],
          yaml.load(tcpdump_vnfd_18741f2a[1]))
     ]
 
@@ -118,9 +118,11 @@ def sonata_demo_mock(
 
     result = []
     for elt in files:
-        urls = compute_urls(elt[0], elt[1], elt[2])
-        result.append((urls[0], [elt[2]]))
-        result.append((urls[1], elt[2]))
+        org = elt[3]
+        urls = compute_urls(elt[0], elt[2], org)
+        boxed = [{elt[1]: org}]
+        result.append((urls[0], boxed))
+        result.append((urls[1], org))
     _LOGGER.debug([elt[0].geturl() for elt in result])
     return result
 

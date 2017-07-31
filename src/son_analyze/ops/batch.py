@@ -30,23 +30,46 @@
 import logging
 from urllib.parse import ParseResult, urljoin
 import datetime
+from typing import Iterable, List, Tuple
 import requests
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
+def _create_batches(start: int, end: int,
+                    batch_size: int) -> List[Tuple[int, int]]:
+    """Returns a list of interval between ``start`` and ``end``."""
+    basel = range(start, end, batch_size)  # type: Iterable[int]
+    res = list(map(lambda elt: (elt, elt + batch_size - 1), basel))
+    if end % batch_size != 0 and res:
+        subs, _ = res[-1]  # type: Tuple[int, int]
+        res[-1] = subs, subs + (end - start) % batch_size
+    return res
+
+
 # pylint: disable=unused-argument
+# pylint: disable=too-many-arguments
 def batch_raw_query(prometheus_endpoint: ParseResult,
                     start_timestamp: int,
                     end_timestamp: int,
                     step: datetime.timedelta,
-                    query: str) -> bytes:
+                    query: str,
+                    maxpts=11000) -> Iterable[bytes]:
     """Retrieve metrics from a Prometheus database"""
-    payload = {'query': query,
-               'start': start_timestamp,
-               'end': end_timestamp,
-               'step': '{}s'.format(int(step.total_seconds()))}
+    sstep = '{}s'.format(int(step.total_seconds()))
     url = urljoin(prometheus_endpoint.geturl(), 'api/v1/query_range')
-    req = requests.get(url, params=payload)
-    return req.content
+
+    def sub(sub_start, sub_end):
+        """sub"""
+        payload = [('start', sub_start),
+                   ('end', sub_end),
+                   ('step', sstep),
+                   ('query', query)]
+        req = requests.get(url, params=payload)
+        return req.content
+    delta = end_timestamp - start_timestamp
+    batch_size = min(delta // int(step.total_seconds()), maxpts)  # type: int
+    for limits in _create_batches(start_timestamp, end_timestamp, batch_size):
+        sub_start, sub_end = limits
+        yield sub(sub_start, sub_end)
