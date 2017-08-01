@@ -84,6 +84,10 @@ def run(args: Namespace) -> None:
         },
         '/dev/urandom': {
             'bind': '/dev/urandom'
+        },
+        token_path: {
+            'bind': token_path,
+            'mode': 'ro'
         }
     }
     if args.dynamic_mount:
