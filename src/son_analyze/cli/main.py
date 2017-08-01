@@ -72,12 +72,22 @@ def bootstrap(args: Namespace) -> None:
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
     cli = APIClient(base_url=args.docker_socket)
+    token_path = os.path.join(args.son_workspace, 'platforms', 'token.txt')
+    _LOGGER.info('The path to the Sonata token file is: %s', token_path)
+    if not (os.path.isfile(token_path) and os.access(token_path, os.R_OK)):
+        _LOGGER.error('The Sonata token file %s is not a readable file',
+                      token_path)
+        sys.exit(1)
     binds = {  # type: Dict[str, Dict[str, str]]
         '/dev/random': {
             'bind': '/dev/random'
         },
         '/dev/urandom': {
             'bind': '/dev/urandom'
+        },
+        token_path: {
+            'bind': token_path,
+            'mode': 'ro'
         }
     }
     if args.dynamic_mount:
@@ -211,7 +221,10 @@ def dispatch(raw_args: List) -> None:
                             default=8888, action='store', dest='jupiter_port',
                             help=('The listening port for the Jupiter '
                                   'server (default: %(default)d)'))
-
+    dworkspace_dir = os.path.join(os.path.expanduser('~'), '.son-workspace')
+    parser_run.add_argument('--son-workspace', default=dworkspace_dir,
+                            action='store', type=str, metavar='DIR',
+                            help='A path to the Sonata workspace directory')
     parser_run.set_defaults(func=run)
 
     parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')
