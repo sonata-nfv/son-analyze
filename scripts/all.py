@@ -71,5 +71,6 @@ def main() -> None:
         launch_command(summaries, name, [command] + args)
     print_summaries(summaries)
 
+
 if __name__ == '__main__':
     main()

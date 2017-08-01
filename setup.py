@@ -52,6 +52,7 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 4):
     sys.exit("Sorry, only Python 3.4 is supported")
 
