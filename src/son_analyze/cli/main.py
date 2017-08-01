@@ -78,7 +78,7 @@ def run(args: Namespace) -> None:
         _LOGGER.error('The Sonata token file %s is not a readable file',
                       token_path)
         sys.exit(1)
-    binds = {  # type: Dict[str, Dict[str, str]]
+    binds = {
         '/dev/random': {
             'bind': '/dev/random'
         },
@@ -89,7 +89,7 @@ def run(args: Namespace) -> None:
             'bind': token_path,
             'mode': 'ro'
         }
-    }
+    }  # type: typing.Dict[str, typing.Dict[str, str]]
     if args.dynamic_mount:
         field_name = os.path.realpath(
             resource_filename('son_analyze.cli', '../../..'))
@@ -241,7 +241,7 @@ def dispatch(raw_args: List) -> None:
     parser_fetch.add_argument('target', type=resource_target,
                               help=('A resource specified by: '
                                     '<vendor>,<name>,<version> or <uuid>'))
-    parser_fetch = parser_fetch.set_defaults(func=fetch_func)
+    parser_fetch.set_defaults(func=fetch_func)
 
     args = parser.parse_args(raw_args)
     logging.basicConfig(level=args.logLevel)

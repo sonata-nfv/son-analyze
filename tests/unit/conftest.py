@@ -123,7 +123,8 @@ def sonata_demo_mock(
         boxed = [{elt[1]: org}]
         result.append((urls[0], boxed))
         result.append((urls[1], org))
-    _LOGGER.debug([elt[0].geturl() for elt in result])
+    _LOGGER.debug('List of urls in the sonata demo mock: %s',
+                  [elt[0].geturl() for elt in result])
     return result
 
 
@@ -197,11 +198,11 @@ def mn_empty_vnf1_container_memory_usage_bytes() -> str:
 @pytest.fixture
 # pylint: disable=invalid-name
 def sonemu_batches_cnt_mem() -> List[str]:
-    filenames = [  # type: List[str]
+    filenames = [
         'mn.empty_vnf1_container_memory_usage_bytes_b1.json',
         'mn.empty_vnf1_container_memory_usage_bytes_b2.json',
         'mn.empty_vnf1_container_memory_usage_bytes_b3.json'
-    ]
+    ]  # type: List[str]
     filepaths = map(lambda x: os.path.join('batch_sonemu_metrics', x),
                     filenames)
     filecontents = map(_read_static_fixtures_file, filepaths)
