@@ -1,5 +1,5 @@
 pyaml==16.12.2
-typing==3.5.0.1
+typing==3.6.1
 pandas==0.20.2
 numpy==1.13.0
 son-analyze==0.0.2
