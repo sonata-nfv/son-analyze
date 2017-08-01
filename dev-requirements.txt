@@ -13,7 +13,7 @@ isort==4.2.5              # via pylint
 lazy-object-proxy==1.2.1  # via astroid
 lxml==3.5.0
 mccabe==0.6.1             # via flake8, pylint
-mypy-lang==0.3.1
+mypy==0.521
 pip-tools==1.9.0
 pluggy==0.3.1             # via tox
 py==1.4.31                # via pytest, pytest-capturelog, tox
@@ -26,5 +26,7 @@ requests==2.10.0          # via requests-mock
 requests_mock==1.0.0
 six==1.10.0               # via astroid, pip-tools, pylint, requests-mock
 tox==2.3.1
+typed-ast==1.0.4          # via mypy
+typing==3.6.1             # via mypy
 virtualenv==15.0.0        # via tox
 wrapt==1.10.6             # via astroid

@@ -5,6 +5,6 @@ flake8==3.4.1
 colorama==0.3.7
 pylint==1.7.1
 lxml==3.5.0
-mypy-lang==0.3.1
+mypy==0.521
 requests_mock==1.0.0
 pytest-capturelog==0.7
