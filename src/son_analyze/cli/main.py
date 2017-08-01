@@ -34,9 +34,9 @@ import signal
 import urllib.parse
 import uuid
 from argparse import ArgumentParser, Namespace, ArgumentTypeError
-from pkg_resources import resource_filename  # type: ignore
 import typing  # noqa pylint: disable=unused-import
 from typing import List
+from pkg_resources import resource_filename  # type: ignore
 from docker import APIClient  # type: ignore
 from son_analyze import __version__
 from son_analyze.cli import fetch_cmd
