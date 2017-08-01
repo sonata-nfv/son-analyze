@@ -72,6 +72,12 @@ def bootstrap(args: Namespace) -> None:
 def run(args: Namespace) -> None:
     """Run an analysis framework environment"""
     cli = APIClient(base_url=args.docker_socket)
+    token_path = os.path.join(args.son_workspace, 'platforms', 'token.txt')
+    _LOGGER.info('The path to the Sonata token file is: %s', token_path)
+    if not (os.path.isfile(token_path) and os.access(token_path, os.R_OK)):
+        _LOGGER.error('The Sonata token file %s is not a readable file',
+                      token_path)
+        sys.exit(1)
     binds = {  # type: Dict[str, Dict[str, str]]
         '/dev/random': {
             'bind': '/dev/random'
