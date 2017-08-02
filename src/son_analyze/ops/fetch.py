@@ -62,8 +62,14 @@ def _get_workspace_token() -> str:
     """Retrieve the authentification token from the workspace"""
     home = os.path.expanduser('~')
     path = os.path.join(home, '.son-workspace', 'platforms', 'token.txt')
-    with open(path) as tkn:
-        return tkn.read()
+    if os.path.isfile(path) and os.access(path, os.R_OK):
+        with open(path) as tkn:
+            return tkn.read()
+    else:
+        _ = 'The Sonata token file {} is not a readable file'.format(path)
+        exc = RuntimeError(_)
+        _LOGGER.error('Error when reading the Sonata auth token: %s', exc)
+        raise exc
 
 
 class _Kind(Enum):
