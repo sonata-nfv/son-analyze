@@ -63,7 +63,7 @@ class _Dispatcher(Enum):
         self.fetch = ffetch
 
 
-def fetch_cmd(gatekeeper: ParseResult, skind: str,
+def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
               target: types.ResourceTargetTuple) -> None:
     """Fetch a vnfd or a nsd (with its dependencies) and display the result
      as Yaml documents on STDOUT."""
@@ -72,10 +72,10 @@ def fetch_cmd(gatekeeper: ParseResult, skind: str,
     except KeyError:
         raise RuntimeError('Invalid resource type {}'.format(skind))
     if target.uuid:
-        res = kind.fetch_by_uuid(gatekeeper, target.uuid)
+        res = kind.fetch_by_uuid(gatekeeper, workspace_path, target.uuid)
     else:
-        res = kind.fetch(gatekeeper, target.vendor, target.name,
-                         target.version)
+        res = kind.fetch(gatekeeper, workspace_path, target.vendor,
+                         target.name, target.version)
     if isinstance(res, tuple):
         base, docs = res
         _print_yml_to_stdout([base] + list(docs.values()))
