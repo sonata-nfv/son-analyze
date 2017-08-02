@@ -26,11 +26,28 @@
 
 
 # pylint: disable=missing-docstring
+import os
 import logging
 import urllib.parse
 import typing  # noqa pylint: disable=unused-import
 import requests_mock  # type: ignore
 from son_analyze.ops import fetch
+
+
+def test_tmp_workspace_dir(caplog, tmp_workspace_dir: str) -> None:
+    caplog.setLevel(logging.DEBUG)
+    assert all([
+        tmp_workspace_dir,
+        os.path.isdir(tmp_workspace_dir),
+        os.access(tmp_workspace_dir, os.R_OK),
+    ])
+    token_path = os.path.join(tmp_workspace_dir, '.son-workspace', 'platforms',
+                              'token.txt')
+    assert all([
+        token_path,
+        os.path.isfile(token_path),
+        os.access(token_path, os.R_OK),
+    ])
 
 
 def test_fetch_nsd(caplog, sonata_demo_mock) -> None:
