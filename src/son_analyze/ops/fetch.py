@@ -97,12 +97,13 @@ def _get_path_from_kind(kind: _Kind) -> str:
 
 # pylint: disable=unsubscriptable-object,too-many-arguments
 def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
-                            workspace_dir: str, path: str,
+                            workspace_dir: str, kind: _Kind,
                             uuid: str) -> Dict[str, Any]:
     """Fetch a resource by its uuid. Return `None` if nothing is found.
     Raise a RuntimeError exception when a error is detected within the
     gatekeeper's API."""
-    url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
+    url = urljoin(gatekeeper_endpoint.geturl(),
+                  os.path.join(_get_path_from_kind(kind), uuid))
     _LOGGER.info('Fetching a resource by uuid at %s', url)
     auth = 'Bearer ' + _get_workspace_token(workspace_dir)
     res_resp = requests.get(url, headers={'content-type': 'application/json',
@@ -220,7 +221,7 @@ def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                        uuid: str) -> Dict[str, Any]:
     """Fetch a vnfd by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   'functions', uuid)
+                                   _Kind.vnfd, uuid)
 
 
 # pylint: disable=unsubscriptable-object
@@ -229,7 +230,7 @@ def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     """Fetch a nsd by its uuid. Return `None` if not found. Raise a
     InvalidResourceReferenceError exception is nothing is found."""
     nsd = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                  'services', uuid)
+                                  _Kind.nsd, uuid)
     if nsd:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
                                         nsd)
@@ -241,7 +242,7 @@ def fetch_vnfr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                        uuid: str) -> Dict[str, Any]:
     """Fetch a vnfr by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   'records/functions', uuid)
+                                   _Kind.vnfr, uuid)
 
 
 # pylint: disable=unsubscriptable-object
@@ -250,5 +251,5 @@ def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     """Fetch a nsr by its uuid. Return `None` if not found. Raise a
     InvalidResourceReferenceError exception is nothing is found."""
     nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                  'records/services', uuid)
+                                  _Kind.nsr, uuid)
     return nsr, None
