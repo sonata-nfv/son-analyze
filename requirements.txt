@@ -11,5 +11,5 @@ pyaml==16.12.2
 pyyaml==3.12              # via pyaml
 requests==2.10.0
 six==1.10.0               # via docker, docker-pycreds, websocket-client
-typing==3.5.0.1
+typing==3.6.1
 websocket-client==0.40.0  # via docker

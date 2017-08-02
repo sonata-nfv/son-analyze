@@ -17,5 +17,5 @@ pyyaml==3.11              # via pyaml
 requests==2.10.0          # via docker, son-analyze
 six==1.10.0               # via docker, docker-pycreds, python-dateutil, websocket-client
 son-analyze==0.0.2
-typing==3.5.0.1
+typing==3.6.1
 websocket-client==0.37.0  # via docker

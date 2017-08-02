@@ -112,7 +112,7 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult, path: str,
     tmp = res_resp.json()
     if not isinstance(tmp, dict) or len(tmp) <= 0:
         exc = RuntimeError('The returned json is malformed:  {}'.format(tmp))
-        _LOGGER.error(exc)
+        _LOGGER.error('Error while fetching a resource using an uuid: %s', exc)
         raise exc
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
                  res_resp.url, res_resp.status_code)
@@ -149,7 +149,7 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, kind: _Kind,
     tmp = res_resp.json()
     if not isinstance(tmp, list):
         exc = RuntimeError('The returned json is not boxed by a list')
-        _LOGGER.error(exc)
+        _LOGGER.error('The GK API must return a list of resources: %s', exc)
         raise exc
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d): %s',
                  res_resp.url, res_resp.status_code, tmp[:20])
@@ -183,7 +183,7 @@ def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
                           fun_desc['vnf_name'], fun_desc['vnf_version'])
         if not vnfd:
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
-            _LOGGER.error(exc)
+            _LOGGER.error('Error when retrieving a vnfd: %s', exc)
             raise exc
         acc[fun_desc['vnf_id']] = vnfd
     return (nsd, acc)
