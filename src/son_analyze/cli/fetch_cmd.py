@@ -78,7 +78,7 @@ def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
                          target.name, target.version)
     if isinstance(res, tuple):
         base, docs = res
-        _print_yml_to_stdout([base] + list(docs.values()))
+        _print_yml_to_stdout([base] + docs)
     else:
         _print_yml_to_stdout([res])
     return

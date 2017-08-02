@@ -32,7 +32,7 @@ from enum import Enum
 import logging
 import collections
 from urllib.parse import ParseResult, urljoin
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 import requests
 
 
@@ -95,7 +95,7 @@ def _get_path_from_kind(kind: _Kind) -> str:
         raise RuntimeError(_)
 
 
-FETCHTYPE = Tuple[Dict[str, Any], Dict[str, Any]]
+FETCHTYPE = Tuple[Dict[str, Any], List[Dict[str, Any]]]
 
 
 # pylint: disable=unsubscriptable-object,too-many-arguments
@@ -191,7 +191,7 @@ def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
     """Retrieve the vnfds mentioned in a nsd. Raise a
     InvalidResourceReferenceError exception if a vnfd is missing."""
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
-    acc = {}  # Dict[str, Any]
+    acc = []  # List[Dict[str, Any]]
     for fun_desc in nsd['network_functions']:
         vnfd = fetch_vnfd(gatekeeper_endpoint, workspace_dir,
                           fun_desc['vnf_vendor'], fun_desc['vnf_name'],
@@ -200,7 +200,7 @@ def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
             _LOGGER.error('Error when retrieving a vnfd: %s', exc)
             raise exc
-        acc[fun_desc['vnf_id']] = vnfd
+        acc.append(vnfd)  # FIX: check for uniqueness ?
     return (nsd, acc)
 
 
@@ -215,7 +215,7 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     if nsd:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
                                         nsd)
-    return nsd, {}
+    return nsd, []
 
 
 # pylint: disable=unsubscriptable-object
@@ -254,4 +254,4 @@ def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     InvalidResourceReferenceError exception is nothing is found."""
     nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
                                   _Kind.nsr, uuid)
-    return nsr, None
+    return nsr, []

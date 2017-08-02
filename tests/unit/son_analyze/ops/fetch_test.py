@@ -62,7 +62,7 @@ def test_fetch_nsd(caplog, tmp_workspace_dir,
                                        'sonata-demo', '0.2.1')
     assert nsd['descriptor_version'] == '1.0'
     assert len(vnfds) == 3
-    assert vnfds['vnf_firewall']['descriptor_version'] == 'vnfd-schema-01'
+    assert vnfds[0]['descriptor_version'] == 'vnfd-schema-01'
 
 
 def test_fetch_vnfd_by_uuid(caplog, tmp_workspace_dir,
@@ -100,4 +100,4 @@ def test_fetch_nfd_by_uuid(caplog, tmp_workspace_dir,
             gate, tmp_workspace_dir, '91460c67-d046-400b-bc34-aadb6514cbfb')
         assert len(nsd2['description']) == 97
         assert len(vnfds2) == 3
-        assert vnfds2['vnf_iperf']['name'] == 'iperf-vnf'
+        assert vnfds2[1]['name'] == 'iperf-vnf'
