@@ -34,7 +34,7 @@ from son_analyze.cli import fetch_cmd
 from son_analyze.core import types
 
 
-def test_fetch_cmd(capsys, sonata_demo_mock) -> None:
+def test_fetch_cmd(capsys, tmp_workspace_dir, sonata_demo_mock) -> None:
     target1 = types.ResourceTargetTuple('sonata-demo',
                                         'eu.sonata-nfv.service-descriptor',
                                         '0.2.1',
@@ -45,13 +45,13 @@ def test_fetch_cmd(capsys, sonata_demo_mock) -> None:
     with requests_mock.Mocker() as mocker:
         for (url, value) in sonata_demo_mock:
             mocker.get(url.geturl(), json=value)
-        fetch_cmd.fetch_cmd(gate, 'nsd', target1)
+        fetch_cmd.fetch_cmd(gate, tmp_workspace_dir, 'nsd', target1)
         out, _ = capsys.readouterr()
         reg = re.compile('^author.*')
         assert reg.match(out)
         reg = re.compile('^---$', re.MULTILINE)
         assert reg.search(out)
-        fetch_cmd.fetch_cmd(gate, 'vnfd', target2)
+        fetch_cmd.fetch_cmd(gate, tmp_workspace_dir, 'vnfd', target2)
         out, _ = capsys.readouterr()
         reg = re.compile('^descriptor_version: vnfd-schema-01$',
                          re.MULTILINE)

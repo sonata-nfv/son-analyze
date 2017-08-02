@@ -28,9 +28,10 @@
 # noqa pylint: disable=unsubscriptable-object,missing-docstring,redefined-outer-name,invalid-sequence-index
 import sys
 import os
+import tempfile
 import logging
 from urllib.parse import ParseResult, urlparse
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Iterable
 import yaml  # type: ignore
 import pytest  # type: ignore
 
@@ -207,3 +208,16 @@ def sonemu_batches_cnt_mem() -> List[str]:
                     filenames)
     filecontents = map(_read_static_fixtures_file, filepaths)
     return list(filecontents)
+
+
+@pytest.fixture
+# pylint: disable=invalid-name
+def tmp_workspace_dir() -> Iterable[str]:
+    workspace_dir = tempfile.TemporaryDirectory()
+    inner_dir = os.path.join(workspace_dir.name, '.son-workspace', 'platforms')
+    os.makedirs(str(inner_dir))
+    with open(os.path.join(inner_dir, 'token.txt'), 'w') as data_file:
+        data_file.write('0123456789')
+        _LOGGER.debug('Created the temporary workspace %s', workspace_dir.name)
+    yield workspace_dir.name
+    workspace_dir.cleanup()
