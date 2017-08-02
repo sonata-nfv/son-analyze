@@ -58,10 +58,11 @@ class InvalidResourceReferenceError(FetchError):
                             missing_vnf_id)
 
 
-def _get_workspace_token() -> str:
+def _get_workspace_token(workspace_dir: str) -> str:
     """Retrieve the authentification token from the workspace"""
-    home = os.path.expanduser('~')
-    path = os.path.join(home, '.son-workspace', 'platforms', 'token.txt')
+    _LOGGER.debug('Computing the Sonata workspace from: %s', workspace_dir)
+    path = os.path.join(workspace_dir, '.son-workspace', 'platforms',
+                        'token.txt')
     if os.path.isfile(path) and os.access(path, os.R_OK):
         with open(path) as tkn:
             return tkn.read()
