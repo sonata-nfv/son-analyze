@@ -95,6 +95,21 @@ def _get_path_from_kind(kind: _Kind) -> str:
         raise RuntimeError(_)
 
 
+def _get_childrend_kind(kind: _Kind) -> _Kind:
+    """Return the kind of resources that can be embedded in the `kind` Kind."""
+    table = {
+        _Kind.nsd: _Kind.vnfd,
+        _Kind.vnfd: None,
+        _Kind.vnfr: None,
+        _Kind.nsr: _Kind.vnfr
+    }
+    try:
+        return table[kind]
+    except KeyError:
+        _ = "Cannot compute the children kind for {}".format(kind)
+        raise RuntimeError(_)
+
+
 FETCHTYPE = Tuple[Dict[str, Any], List[Dict[str, Any]]]
 
 
