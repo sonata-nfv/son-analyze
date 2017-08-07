@@ -101,7 +101,7 @@ FETCHTYPE = Tuple[Dict[str, Any], List[Dict[str, Any]]]
 # pylint: disable=unsubscriptable-object,too-many-arguments
 def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
                             workspace_dir: str, kind: _Kind,
-                            uuid: str) -> FETCHTYPE:
+                            uuid: str) -> Dict[str, Any]:
     """Fetch a resource by its uuid. Return `None` if nothing is found.
     Raise a RuntimeError exception when a error is detected within the
     gatekeeper's API."""
@@ -128,7 +128,7 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
         raise exc
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
                  res_resp.url, res_resp.status_code)
-    return tmp, []
+    return tmp
 
 
 # pylint: disable=unsubscriptable-object
@@ -207,15 +207,12 @@ def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
 # pylint: disable=unsubscriptable-object
 def fetch_nsd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
               vendor: str, name: str,
-              version: str) -> FETCHTYPE:
+              version: str) -> Dict[str, Any]:
     """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
     Raise a FileNotFoundError if  """
     nsd = _fetch_resource(gatekeeper_endpoint, workspace_dir, _Kind.nsd,
                           vendor, name, version)
-    if nsd:
-        return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        nsd)
-    return nsd, []
+    return nsd
 
 
 # pylint: disable=unsubscriptable-object
@@ -223,20 +220,17 @@ def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                        uuid: str) -> Dict[str, Any]:
     """Fetch a vnfd by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   _Kind.vnfd, uuid)[0]
+                                   _Kind.vnfd, uuid)
 
 
 # pylint: disable=unsubscriptable-object
 def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                      uuid: str) -> FETCHTYPE:
+                      uuid: str) -> Dict[str, Any]:
     """Fetch a nsd by its uuid. Return `None` if not found. Raise a
     InvalidResourceReferenceError exception is nothing is found."""
-    nsd, _ = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                     _Kind.nsd, uuid)
-    if nsd:
-        return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        nsd)
-    return None  # FIX bug
+    nsd = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
+                                  _Kind.nsd, uuid)
+    return nsd
 
 
 # pylint: disable=unsubscriptable-object
@@ -244,12 +238,12 @@ def fetch_vnfr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                        uuid: str) -> Dict[str, Any]:
     """Fetch a vnfr by its uuid"""
     return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   _Kind.vnfr, uuid)[0]
+                                   _Kind.vnfr, uuid)
 
 
 # pylint: disable=unsubscriptable-object
 def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                      uuid: str) -> FETCHTYPE:
+                      uuid: str) -> Dict[str, Any]:
     """Fetch a nsr by its uuid. Return `None` if not found. Raise a
     InvalidResourceReferenceError exception is nothing is found."""
     nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
