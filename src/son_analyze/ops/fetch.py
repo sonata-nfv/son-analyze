@@ -278,3 +278,17 @@ def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
                                         base)
     return base, []
+
+
+# pylint: disable=unsubscriptable-object,too-many-arguments
+def fetch_resources_by_uuid(gatekeeper_endpoint: ParseResult,
+                            workspace_dir: str, kind: _Kind,
+                            uuid: str) -> FETCHTYPE:
+    """Fetch a main resource and its sub-element"""
+    base = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir, kind,
+                                   uuid)
+    kchildren = _get_childrend_kind(kind)
+    if base and kchildren:
+        return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
+                                        base)
+    return base, []
