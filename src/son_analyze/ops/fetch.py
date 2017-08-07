@@ -264,3 +264,17 @@ def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
                                   _Kind.nsr, uuid)
     return nsr
+
+
+# pylint: disable=unsubscriptable-object
+def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
+                    kind: _Kind, vendor: str, name: str,
+                    version: str) -> FETCHTYPE:
+    """Fetch a main resource and its sub-elements"""
+    base = _fetch_resource(gatekeeper_endpoint, workspace_dir, kind, vendor,
+                           name, version)
+    kchildren = _get_childrend_kind(kind)
+    if base and kchildren:
+        return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
+                                        base)
+    return base, []
