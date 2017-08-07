@@ -58,7 +58,7 @@ def test_fetch_nsd(caplog, tmp_workspace_dir,
             mocker.get(url.geturl(), json=value)
         gate = urllib.parse.urlparse('http://localhost/mock/')
         (nsd, vnfds) = fetch.fetch_resources(
-            gate, tmp_workspace_dir, fetch._Kind.nsd,
+            gate, tmp_workspace_dir, fetch.Kind.nsd,
             'eu.sonata-nfv.service-descriptor', 'sonata-demo', '0.2.1')
     assert nsd['descriptor_version'] == '1.0'
     assert len(vnfds) == 3
@@ -76,11 +76,11 @@ def test_fetch_vnfd_by_uuid(caplog, tmp_workspace_dir,
                    status_code=404, text='Not Found')
         gate = urllib.parse.urlparse('http://localhost/mock/')
         vnfd1 = fetch._fetch_resource_by_uuid(
-            gate, tmp_workspace_dir, fetch._Kind.vnfd,
+            gate, tmp_workspace_dir, fetch.Kind.vnfd,
             'c2404aff-cf03-4522-9f9a-80c7d3be6409')
         assert not vnfd1
         vnfd2 = fetch._fetch_resource_by_uuid(
-            gate, tmp_workspace_dir, fetch._Kind.vnfd,
+            gate, tmp_workspace_dir, fetch.Kind.vnfd,
             'dce50374-c4e2-4902-b6e4-cd23b72e8f19')
         assert len(vnfd2['description']) == 34
 
@@ -96,11 +96,11 @@ def test_fetch_nfd_by_uuid(caplog, tmp_workspace_dir,
                    status_code=404, text='Not Found')
         gate = urllib.parse.urlparse('http://localhost/mock/')
         nsd1 = fetch._fetch_resource_by_uuid(
-            gate, tmp_workspace_dir, fetch._Kind.nsd,
+            gate, tmp_workspace_dir, fetch.Kind.nsd,
             'c2404aff-cf03-4522-9f9a-80c7d3be6409')
         assert not nsd1
         (nsd2, vnfds2) = fetch.fetch_resources_by_uuid(
-            gate, tmp_workspace_dir, fetch._Kind.nsd,
+            gate, tmp_workspace_dir, fetch.Kind.nsd,
             '91460c67-d046-400b-bc34-aadb6514cbfb')
         assert len(nsd2['description']) == 97
         assert len(vnfds2) == 3

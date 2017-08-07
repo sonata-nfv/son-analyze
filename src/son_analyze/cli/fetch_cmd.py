@@ -53,10 +53,10 @@ def _not_available(*_):
 
 
 class _Dispatcher(Enum):
-    vnfd = fetch._Kind.vnfd
-    nsd = fetch._Kind.nsd
-    vnfr = fetch._Kind.vnfr
-    nsr = fetch._Kind.nsr
+    vnfd = fetch.Kind.vnfd
+    nsd = fetch.Kind.nsd
+    vnfr = fetch.Kind.vnfr
+    nsr = fetch.Kind.nsr
 
 
 def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
