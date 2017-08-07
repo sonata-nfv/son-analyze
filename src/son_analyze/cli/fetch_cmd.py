@@ -72,9 +72,11 @@ def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
     except KeyError:
         raise RuntimeError('Invalid resource type {}'.format(skind))
     if target.uuid:
-        res = kind.fetch_by_uuid(gatekeeper, workspace_path, target.uuid)
+        base, children = fetch.fetch_resources_by_uuid(
+            gatekeeper, workspace_path, fetch._Kind.nsd, target.uuid)
     else:
-        res = kind.fetch(gatekeeper, workspace_path, target.vendor,
-                         target.name, target.version)
-    _print_yml_to_stdout([res])
+        base, children = fetch.fetch_resources(
+            gatekeeper, workspace_path, fetch._Kind.nsd, target.vendor,
+            target.name, target.version)
+    _print_yml_to_stdout([base] + children)
     return
