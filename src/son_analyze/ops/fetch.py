@@ -148,9 +148,9 @@ def fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
 
 
 # pylint: disable=unsubscriptable-object
-def _fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                    kind: Kind, vendor: str, name: str,
-                    version: str) -> Dict[str, Any]:
+def fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
+                   kind: Kind, vendor: str, name: str,
+                   version: str) -> Dict[str, Any]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
@@ -196,8 +196,8 @@ def fetch_vnfd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                vendor: str, name: str,
                version: str) -> Dict[str, Any]:
     """Fetch a Vnfd. Return `None` if nothing is found."""
-    return _fetch_resource(gatekeeper_endpoint, workspace_dir, Kind.vnfd,
-                           vendor, name, version)
+    return fetch_resource(gatekeeper_endpoint, workspace_dir, Kind.vnfd,
+                          vendor, name, version)
 
 
 # pylint: disable=unsubscriptable-object
@@ -209,9 +209,9 @@ def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
     acc = []  # List[Dict[str, Any]]
     for fun_desc in nsd['network_functions']:
-        vnfd = _fetch_resource(gatekeeper_endpoint, workspace_dir, kchildren,
-                               fun_desc['vnf_vendor'], fun_desc['vnf_name'],
-                               fun_desc['vnf_version'])
+        vnfd = fetch_resource(gatekeeper_endpoint, workspace_dir, kchildren,
+                              fun_desc['vnf_vendor'], fun_desc['vnf_name'],
+                              fun_desc['vnf_version'])
         if not vnfd:
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
             _LOGGER.error('Error when retrieving a vnfd: %s', exc)
@@ -226,8 +226,8 @@ def fetch_nsd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
               version: str) -> Dict[str, Any]:
     """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
     Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, workspace_dir, Kind.nsd,
-                          vendor, name, version)
+    nsd = fetch_resource(gatekeeper_endpoint, workspace_dir, Kind.nsd,
+                         vendor, name, version)
     return nsd
 
 
@@ -272,8 +272,8 @@ def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                     kind: Kind, vendor: str, name: str,
                     version: str) -> FETCHTYPE:
     """Fetch a main resource and its sub-elements"""
-    base = _fetch_resource(gatekeeper_endpoint, workspace_dir, kind, vendor,
-                           name, version)
+    base = fetch_resource(gatekeeper_endpoint, workspace_dir, kind, vendor,
+                          name, version)
     kchildren = _get_childrend_kind(kind)
     if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
