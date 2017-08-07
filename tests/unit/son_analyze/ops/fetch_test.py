@@ -75,11 +75,11 @@ def test_fetch_vnfd_by_uuid(caplog, tmp_workspace_dir,
                    'functions/c2404aff-cf03-4522-9f9a-80c7d3be6409',
                    status_code=404, text='Not Found')
         gate = urllib.parse.urlparse('http://localhost/mock/')
-        vnfd1 = fetch._fetch_resource_by_uuid(
+        vnfd1 = fetch.fetch_resource_by_uuid(
             gate, tmp_workspace_dir, fetch.Kind.vnfd,
             'c2404aff-cf03-4522-9f9a-80c7d3be6409')
         assert not vnfd1
-        vnfd2 = fetch._fetch_resource_by_uuid(
+        vnfd2 = fetch.fetch_resource_by_uuid(
             gate, tmp_workspace_dir, fetch.Kind.vnfd,
             'dce50374-c4e2-4902-b6e4-cd23b72e8f19')
         assert len(vnfd2['description']) == 34
@@ -95,7 +95,7 @@ def test_fetch_nfd_by_uuid(caplog, tmp_workspace_dir,
                    'services/c2404aff-cf03-4522-9f9a-80c7d3be6409',
                    status_code=404, text='Not Found')
         gate = urllib.parse.urlparse('http://localhost/mock/')
-        nsd1 = fetch._fetch_resource_by_uuid(
+        nsd1 = fetch.fetch_resource_by_uuid(
             gate, tmp_workspace_dir, fetch.Kind.nsd,
             'c2404aff-cf03-4522-9f9a-80c7d3be6409')
         assert not nsd1
