@@ -201,16 +201,16 @@ def fetch_vnfd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
 
 # pylint: disable=unsubscriptable-object
 def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
-                             workspace_dir: str,
-                             nsd: Dict[str, Any]) -> FETCHTYPE:
+                             workspace_dir: str, nsd: Dict[str, Any],
+                             kchildren: _Kind) -> FETCHTYPE:
     """Retrieve the vnfds mentioned in a nsd. Raise a
     InvalidResourceReferenceError exception if a vnfd is missing."""
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
     acc = []  # List[Dict[str, Any]]
     for fun_desc in nsd['network_functions']:
-        vnfd = fetch_vnfd(gatekeeper_endpoint, workspace_dir,
-                          fun_desc['vnf_vendor'], fun_desc['vnf_name'],
-                          fun_desc['vnf_version'])
+        vnfd = _fetch_resource(gatekeeper_endpoint, workspace_dir, kchildren,
+                               fun_desc['vnf_vendor'], fun_desc['vnf_name'],
+                               fun_desc['vnf_version'])
         if not vnfd:
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
             _LOGGER.error('Error when retrieving a vnfd: %s', exc)
@@ -276,7 +276,7 @@ def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     kchildren = _get_childrend_kind(kind)
     if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        base)
+                                        base, kchildren)
     return base, []
 
 
@@ -290,5 +290,5 @@ def fetch_resources_by_uuid(gatekeeper_endpoint: ParseResult,
     kchildren = _get_childrend_kind(kind)
     if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        base)
+                                        base, kchildren)
     return base, []
