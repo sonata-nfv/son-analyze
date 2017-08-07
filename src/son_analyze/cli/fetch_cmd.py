@@ -53,14 +53,10 @@ def _not_available(*_):
 
 
 class _Dispatcher(Enum):
-    vnfd = (fetch.fetch_vnfd_by_uuid, fetch.fetch_vnfd)
-    nsd = (fetch.fetch_nsd_by_uuid, fetch.fetch_nsd)
-    vnfr = (fetch.fetch_vnfr_by_uuid, _not_available)
-    nsr = (fetch.fetch_nsr_by_uuid, _not_available)
-
-    def __init__(self, ffetch_by_uuid, ffetch):
-        self.fetch_by_uuid = ffetch_by_uuid
-        self.fetch = ffetch
+    vnfd = fetch._Kind.vnfd
+    nsd = fetch._Kind.nsd
+    vnfr = fetch._Kind.vnfr
+    nsr = fetch._Kind.nsr
 
 
 def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
@@ -73,10 +69,10 @@ def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
         raise RuntimeError('Invalid resource type {}'.format(skind))
     if target.uuid:
         base, children = fetch.fetch_resources_by_uuid(
-            gatekeeper, workspace_path, fetch._Kind.nsd, target.uuid)
+            gatekeeper, workspace_path, kind.value, target.uuid)
     else:
         base, children = fetch.fetch_resources(
-            gatekeeper, workspace_path, fetch._Kind.nsd, target.vendor,
-            target.name, target.version)
+            gatekeeper, workspace_path, kind.value, target.vendor, target.name,
+            target.version)
     _print_yml_to_stdout([base] + children)
     return
