@@ -28,7 +28,6 @@
 """son-analyze fetch command"""
 
 # pylint: disable=unsubscriptable-object
-from enum import Enum
 import logging
 from urllib.parse import ParseResult
 from typing import Dict, Iterable, Any
@@ -52,27 +51,20 @@ def _not_available(*_):
     raise RuntimeError(_)
 
 
-class _Dispatcher(Enum):
-    vnfd = fetch.Kind.vnfd
-    nsd = fetch.Kind.nsd
-    vnfr = fetch.Kind.vnfr
-    nsr = fetch.Kind.nsr
-
-
 def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
               target: types.ResourceTargetTuple) -> None:
     """Fetch a vnfd or a nsd (with its dependencies) and display the result
      as Yaml documents on STDOUT."""
     try:
-        kind = _Dispatcher[skind]  # type: ignore
+        kind = fetch.Kind[skind]
     except KeyError:
         raise RuntimeError('Invalid resource type {}'.format(skind))
     if target.uuid:
         base, children = fetch.fetch_resources_by_uuid(
-            gatekeeper, workspace_path, kind.value, target.uuid)
+            gatekeeper, workspace_path, kind, target.uuid)
     else:
         base, children = fetch.fetch_resources(
-            gatekeeper, workspace_path, kind.value, target.vendor, target.name,
+            gatekeeper, workspace_path, kind, target.vendor, target.name,
             target.version)
     _print_yml_to_stdout([base] + children)
     return
