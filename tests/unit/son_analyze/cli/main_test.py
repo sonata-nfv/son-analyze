@@ -26,6 +26,7 @@
 
 
 # pylint: disable=missing-docstring
+import os
 from time import sleep
 import logging
 from multiprocessing import Process
@@ -71,7 +72,8 @@ def run_bg(request):
 @pytest.mark.usefixtures("run_bg")
 def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
     req = None
-    for _ in range(30):
+    loop_run = os.getenv('PYTEST_TEST_RUN_TRY', "30")
+    for _ in range(int(loop_run)):
         try:
             filters = {'label': 'com.sonata.analyze'}
             targets = docker_cli.containers(filters=filters)
