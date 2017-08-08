@@ -83,9 +83,10 @@ def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
                 req = requests.get('http://{}:8888'.format(container_ip))
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.warning('Unable to connect to the Docker daemon: %s', exc)
-        if req and req.status_code == 200:
+        if req and hasattr(req, 'status_code') and req.status_code == 200:
             break
         sleep(0.2)
+    assert req and hasattr(req, 'status_code')
     assert req.status_code == 200
     base = '/son-analyze'
     # Verify that the source is here
