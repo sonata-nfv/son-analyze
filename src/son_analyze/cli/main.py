@@ -246,6 +246,7 @@ def dispatch(raw_args: List) -> None:
 
     args = parser.parse_args(raw_args)
     logging.basicConfig(level=args.logLevel)
+    _LOGGER.debug("Setting level to %s", args.logLevel)
     args.func(args)
     assert False  # this line is impossible to reach
 
