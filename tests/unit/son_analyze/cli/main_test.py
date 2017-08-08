@@ -60,7 +60,7 @@ def test_version(capsys) -> None:
 @pytest.fixture(scope="function")
 def run_bg(request):
     run_process = Process(target=son_analyze.cli.main.dispatch,  # type: ignore
-                          args=(['run'],))
+                          args=(['--verbose', 'run'],))
     run_process.start()  # type: ignore
 
     def fin():
