@@ -27,6 +27,7 @@
 
 # pylint: disable=missing-docstring
 from time import sleep
+import logging
 from multiprocessing import Process
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
@@ -34,6 +35,9 @@ import requests
 from docker import APIClient  # type: ignore
 import son_analyze.cli.main
 from son_analyze import __version__
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
@@ -77,8 +81,8 @@ def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
                 container_ip = inspection.get('NetworkSettings') \
                                          .get('IPAddress')
                 req = requests.get('http://{}:8888'.format(container_ip))
-        except requests.exceptions.ConnectionError:
-            pass
+        except requests.exceptions.ConnectionError as exc:
+            _LOGGER.warning('Unable to connect to the Docker daemon: %s', exc)
         if req and req.status_code == 200:
             break
         sleep(0.2)
