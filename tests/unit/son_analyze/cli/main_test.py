@@ -82,8 +82,8 @@ def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
                                          .get('IPAddress')
                 req = requests.get('http://{}:8888'.format(container_ip))
             else:
-                _ = 'The son-analyze container wasn\'t found, targets=%s'
-                _LOGGER.debug(_, targets)
+                msg = 'The son-analyze container wasn\'t found, targets=%s'
+                _LOGGER.debug(msg, targets)
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.warning('Unable to connect to the son-analyze ui: %s', exc)
         if req and hasattr(req, 'status_code') and req.status_code == 200:
