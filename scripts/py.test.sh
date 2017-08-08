@@ -9,7 +9,7 @@ is_ci() {
 run_pytest() {
     >&2 echo -e '*** Running py.test\n'
     if is_ci; then
-        py.test --junit-xml='outputs/_output_pytest.out' $@
+        py.test -s --junit-xml='outputs/_output_pytest.out' $@
     else
         py.test $@
     fi
