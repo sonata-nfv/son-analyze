@@ -66,6 +66,8 @@ def run_bg(request):
 
     def fin():
         run_process.terminate()  # type: ignore
+        _LOGGER.info('The CI run process finished with the exit code: %s',
+                     run_process.exitcode)
     request.addfinalizer(fin)
 
 
