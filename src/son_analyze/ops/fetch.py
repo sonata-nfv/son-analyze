@@ -32,7 +32,7 @@ from enum import Enum
 import logging
 import collections
 from urllib.parse import ParseResult, urljoin
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 import requests
 
 
@@ -73,20 +73,21 @@ def _get_workspace_token(workspace_dir: str) -> str:
         raise exc
 
 
-class _Kind(Enum):
+class Kind(Enum):
+    """The different available resources"""
     nsd = 1
     vnfd = 2
     vnfr = 3
     nsr = 4
 
 
-def _get_path_from_kind(kind: _Kind) -> str:
+def _get_path_from_kind(kind: Kind) -> str:
     """Return the api path for a given resource kind"""
     table = {
-        _Kind.nsd: 'services',
-        _Kind.vnfd: 'functions',
-        _Kind.vnfr: 'records/functions',
-        _Kind.nsr: 'records/services'
+        Kind.nsd: 'services',
+        Kind.vnfd: 'functions',
+        Kind.vnfr: 'records/functions',
+        Kind.nsr: 'records/services'
     }
     try:
         return table[kind]
@@ -95,14 +96,33 @@ def _get_path_from_kind(kind: _Kind) -> str:
         raise RuntimeError(_)
 
 
+def _get_childrend_kind(kind: Kind) -> Kind:
+    """Return the kind of resources that can be embedded in the `kind` Kind."""
+    table = {
+        Kind.nsd: Kind.vnfd,
+        Kind.vnfd: None,
+        Kind.vnfr: None,
+        Kind.nsr: Kind.vnfr
+    }
+    try:
+        return table[kind]
+    except KeyError:
+        _ = "Cannot compute the children kind for {}".format(kind)
+        raise RuntimeError(_)
+
+
+FETCHTYPE = Tuple[Dict[str, Any], List[Dict[str, Any]]]
+
+
 # pylint: disable=unsubscriptable-object,too-many-arguments
-def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
-                            workspace_dir: str, path: str,
-                            uuid: str) -> Dict[str, Any]:
+def fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
+                           workspace_dir: str, kind: Kind,
+                           uuid: str) -> Dict[str, Any]:
     """Fetch a resource by its uuid. Return `None` if nothing is found.
     Raise a RuntimeError exception when a error is detected within the
     gatekeeper's API."""
-    url = urljoin(gatekeeper_endpoint.geturl(), os.path.join(path, uuid))
+    url = urljoin(gatekeeper_endpoint.geturl(),
+                  os.path.join(_get_path_from_kind(kind), uuid))
     _LOGGER.info('Fetching a resource by uuid at %s', url)
     auth = 'Bearer ' + _get_workspace_token(workspace_dir)
     res_resp = requests.get(url, headers={'content-type': 'application/json',
@@ -128,9 +148,9 @@ def _fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
 
 
 # pylint: disable=unsubscriptable-object
-def _fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                    kind: _Kind, vendor: str, name: str,
-                    version: str) -> Dict[str, Any]:
+def fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
+                   kind: Kind, vendor: str, name: str,
+                   version: str) -> Dict[str, Any]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
@@ -172,83 +192,48 @@ def _fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
 
 
 # pylint: disable=unsubscriptable-object
-def fetch_vnfd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-               vendor: str, name: str,
-               version: str) -> Dict[str, Any]:
-    """Fetch a Vnfd. Return `None` if nothing is found."""
-    return _fetch_resource(gatekeeper_endpoint, workspace_dir, _Kind.vnfd,
-                           vendor, name, version)
-
-
-# pylint: disable=unsubscriptable-object
 def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
-                             workspace_dir: str,
-                             nsd: Dict[str, Any]) -> Tuple[Dict[str, Any],
-                                                           Dict[str, Any]]:
+                             workspace_dir: str, nsd: Dict[str, Any],
+                             kchildren: Kind) -> FETCHTYPE:
     """Retrieve the vnfds mentioned in a nsd. Raise a
     InvalidResourceReferenceError exception if a vnfd is missing."""
     _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
-    acc = {}  # Dict[str, Any]
+    acc = []  # List[Dict[str, Any]]
     for fun_desc in nsd['network_functions']:
-        vnfd = fetch_vnfd(gatekeeper_endpoint, workspace_dir,
-                          fun_desc['vnf_vendor'], fun_desc['vnf_name'],
-                          fun_desc['vnf_version'])
+        vnfd = fetch_resource(gatekeeper_endpoint, workspace_dir, kchildren,
+                              fun_desc['vnf_vendor'], fun_desc['vnf_name'],
+                              fun_desc['vnf_version'])
         if not vnfd:
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
             _LOGGER.error('Error when retrieving a vnfd: %s', exc)
             raise exc
-        acc[fun_desc['vnf_id']] = vnfd
+        acc.append(vnfd)  # FIX: check for uniqueness ?
     return (nsd, acc)
 
 
 # pylint: disable=unsubscriptable-object
-def fetch_nsd(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-              vendor: str, name: str,
-              version: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Fetch a Nsd with its related Vnfd. Return `None` if nothing is found.
-    Raise a FileNotFoundError if  """
-    nsd = _fetch_resource(gatekeeper_endpoint, workspace_dir, _Kind.nsd,
-                          vendor, name, version)
-    if nsd:
+def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
+                    kind: Kind, vendor: str, name: str,
+                    version: str) -> FETCHTYPE:
+    """Fetch a main resource and its sub-elements"""
+    base = fetch_resource(gatekeeper_endpoint, workspace_dir, kind, vendor,
+                          name, version)
+    kchildren = _get_childrend_kind(kind)
+    if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        nsd)
-    return nsd, {}
+                                        base, kchildren)
+    return base, []
 
 
-# pylint: disable=unsubscriptable-object
-def fetch_vnfd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                       uuid: str) -> Dict[str, Any]:
-    """Fetch a vnfd by its uuid"""
-    return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   'functions', uuid)
-
-
-# pylint: disable=unsubscriptable-object
-def fetch_nsd_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                      uuid: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Fetch a nsd by its uuid. Return `None` if not found. Raise a
-    InvalidResourceReferenceError exception is nothing is found."""
-    nsd = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                  'services', uuid)
-    if nsd:
+# pylint: disable=unsubscriptable-object,too-many-arguments
+def fetch_resources_by_uuid(gatekeeper_endpoint: ParseResult,
+                            workspace_dir: str, kind: Kind,
+                            uuid: str) -> FETCHTYPE:
+    """Fetch a main resource and its sub-element"""
+    base = fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir, kind,
+                                  uuid)
+    kchildren = _get_childrend_kind(kind)
+    if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        nsd)
-    return None  # FIX bug
-
-
-# pylint: disable=unsubscriptable-object
-def fetch_vnfr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                       uuid: str) -> Dict[str, Any]:
-    """Fetch a vnfr by its uuid"""
-    return _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                   'records/functions', uuid)
-
-
-# pylint: disable=unsubscriptable-object
-def fetch_nsr_by_uuid(gatekeeper_endpoint: ParseResult, workspace_dir: str,
-                      uuid: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Fetch a nsr by its uuid. Return `None` if not found. Raise a
-    InvalidResourceReferenceError exception is nothing is found."""
-    nsr = _fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
-                                  'records/services', uuid)
-    return nsr, None
+                                        base, kchildren)
+    return base, []

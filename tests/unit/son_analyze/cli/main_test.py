@@ -26,7 +26,9 @@
 
 
 # pylint: disable=missing-docstring
+import os
 from time import sleep
+import logging
 from multiprocessing import Process
 import typing  # noqa pylint: disable=unused-import
 import pytest  # type: ignore
@@ -34,6 +36,9 @@ import requests
 from docker import APIClient  # type: ignore
 import son_analyze.cli.main
 from son_analyze import __version__
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
@@ -56,18 +61,23 @@ def test_version(capsys) -> None:
 @pytest.fixture(scope="function")
 def run_bg(request):
     run_process = Process(target=son_analyze.cli.main.dispatch,  # type: ignore
-                          args=(['run'],))
+                          args=(['--verbose', 'run'],))
     run_process.start()  # type: ignore
 
     def fin():
         run_process.terminate()  # type: ignore
+        _LOGGER.info('The CI run process finished with the exit code: %s',
+                     run_process.exitcode)
     request.addfinalizer(fin)
 
 
 @pytest.mark.usefixtures("run_bg")
 def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
     req = None
-    for _ in range(30):
+    loop_run = os.getenv('PYTEST_TEST_RUN_TRY', "30")
+    for loopi in range(int(loop_run)):
+        _LOGGER.debug('Trying to detect the son-analyze ui: %s/%s', loopi,
+                      loop_run)
         try:
             filters = {'label': 'com.sonata.analyze'}
             targets = docker_cli.containers(filters=filters)
@@ -77,11 +87,15 @@ def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
                 container_ip = inspection.get('NetworkSettings') \
                                          .get('IPAddress')
                 req = requests.get('http://{}:8888'.format(container_ip))
-        except requests.exceptions.ConnectionError:
-            pass
-        if req and req.status_code == 200:
+            else:
+                msg = 'The son-analyze container wasn\'t found, targets=%s'
+                _LOGGER.debug(msg, targets)
+        except requests.exceptions.ConnectionError as exc:
+            _LOGGER.warning('Unable to connect to the son-analyze ui: %s', exc)
+        if req and hasattr(req, 'status_code') and req.status_code == 200:
             break
         sleep(0.2)
+    assert req and hasattr(req, 'status_code')
     assert req.status_code == 200
     base = '/son-analyze'
     # Verify that the source is here

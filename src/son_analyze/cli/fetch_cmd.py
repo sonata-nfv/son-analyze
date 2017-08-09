@@ -28,7 +28,6 @@
 """son-analyze fetch command"""
 
 # pylint: disable=unsubscriptable-object
-from enum import Enum
 import logging
 from urllib.parse import ParseResult
 from typing import Dict, Iterable, Any
@@ -52,33 +51,20 @@ def _not_available(*_):
     raise RuntimeError(_)
 
 
-class _Dispatcher(Enum):
-    vnfd = (fetch.fetch_vnfd_by_uuid, fetch.fetch_vnfd)
-    nsd = (fetch.fetch_nsd_by_uuid, fetch.fetch_nsd)
-    vnfr = (fetch.fetch_vnfr_by_uuid, _not_available)
-    nsr = (fetch.fetch_nsr_by_uuid, _not_available)
-
-    def __init__(self, ffetch_by_uuid, ffetch):
-        self.fetch_by_uuid = ffetch_by_uuid
-        self.fetch = ffetch
-
-
 def fetch_cmd(gatekeeper: ParseResult, workspace_path: str, skind: str,
               target: types.ResourceTargetTuple) -> None:
     """Fetch a vnfd or a nsd (with its dependencies) and display the result
      as Yaml documents on STDOUT."""
     try:
-        kind = _Dispatcher[skind]  # type: ignore
+        kind = fetch.Kind[skind]
     except KeyError:
         raise RuntimeError('Invalid resource type {}'.format(skind))
     if target.uuid:
-        res = kind.fetch_by_uuid(gatekeeper, workspace_path, target.uuid)
+        base, children = fetch.fetch_resources_by_uuid(
+            gatekeeper, workspace_path, kind, target.uuid)
     else:
-        res = kind.fetch(gatekeeper, workspace_path, target.vendor,
-                         target.name, target.version)
-    if isinstance(res, tuple):
-        base, docs = res
-        _print_yml_to_stdout([base] + list(docs.values()))
-    else:
-        _print_yml_to_stdout([res])
+        base, children = fetch.fetch_resources(
+            gatekeeper, workspace_path, kind, target.vendor, target.name,
+            target.version)
+    _print_yml_to_stdout([base] + children)
     return
