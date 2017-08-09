@@ -75,7 +75,9 @@ def run_bg(request):
 def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
     req = None
     loop_run = os.getenv('PYTEST_TEST_RUN_TRY', "30")
-    for _ in range(int(loop_run)):
+    for loopi in range(int(loop_run)):
+        _LOGGER.debug('Trying to detect the son-analyze ui: %s/%s', loopi,
+                      loop_run)
         try:
             filters = {'label': 'com.sonata.analyze'}
             targets = docker_cli.containers(filters=filters)
