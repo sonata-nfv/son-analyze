@@ -121,7 +121,7 @@ def sonata_demo_mock(
     for elt in files:
         org = elt[3]
         urls = compute_urls(elt[0], elt[2], org)
-        boxed = [{elt[1]: org}]
+        boxed = [{elt[1]: org, 'uuid': elt[2]}]
         result.append((urls[0], boxed))
         result.append((urls[1], org))
     _LOGGER.debug('List of urls in the sonata demo mock: %s',
