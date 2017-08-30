@@ -179,7 +179,7 @@ def url_type(raw_url: str) -> urllib.parse.ParseResult:
 
 def fetch_func(args: Namespace) -> None:
     """Fetch data"""
-    fetch_cmd.fetch_cmd(args.endpoint, args.dworkspace_dir, args.kind,
+    fetch_cmd.fetch_cmd(args.endpoint, args.son_workspace, args.kind,
                         args.target)
     sys.exit(0)
 
@@ -196,6 +196,10 @@ def dispatch(raw_args: List) -> None:
                         action='store',
                         help=('An uri to the docker socket '
                               '(default: %(default)s)'))
+    dworkspace_dir = os.path.join(os.path.expanduser('~'), '.son-workspace')
+    parser.add_argument('--son-workspace', default=dworkspace_dir,
+                        action='store', type=str, metavar='DIR',
+                        help='A path to the Sonata workspace directory')
 
     def no_command(_: Namespace) -> None:
         """Print the help usage and exit"""
@@ -222,10 +226,6 @@ def dispatch(raw_args: List) -> None:
                             default=8888, action='store', dest='jupiter_port',
                             help=('The listening port for the Jupiter '
                                   'server (default: %(default)d)'))
-    dworkspace_dir = os.path.join(os.path.expanduser('~'), '.son-workspace')
-    parser_run.add_argument('--son-workspace', default=dworkspace_dir,
-                            action='store', type=str, metavar='DIR',
-                            help='A path to the Sonata workspace directory')
     parser_run.set_defaults(func=run)
 
     parser_fetch = subparsers.add_parser('fetch', help='Fetch data/metrics')

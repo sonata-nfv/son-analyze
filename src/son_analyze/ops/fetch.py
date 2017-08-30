@@ -61,7 +61,7 @@ class InvalidResourceReferenceError(FetchError):
 def _get_workspace_token(workspace_dir: str) -> str:
     """Retrieve the authentification token from the workspace"""
     _LOGGER.debug('Computing the Sonata workspace from: %s', workspace_dir)
-    path = os.path.join(workspace_dir, '.son-workspace', 'platforms',
+    path = os.path.join(workspace_dir, 'platforms',
                         'token.txt')
     if os.path.isfile(path) and os.access(path, os.R_OK):
         with open(path) as tkn:
@@ -144,13 +144,15 @@ def fetch_resource_by_uuid(gatekeeper_endpoint: ParseResult,
         raise exc
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d)',
                  res_resp.url, res_resp.status_code)
+    if kind.name in tmp:  # the resource is boxed
+        tmp = tmp[kind.name]
     return tmp
 
 
 # pylint: disable=unsubscriptable-object
 def fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                    kind: Kind, vendor: str, name: str,
-                   version: str) -> Dict[str, Any]:
+                   version: str) -> Tuple[str, Dict[str, Any]]:
     """Fetch a resource and return the Json as a dictionary. Return `None` if
      nothing is found. It raise a RuntimeError exception when a gatekeeper API
      is dectected"""
@@ -183,26 +185,36 @@ def fetch_resource(gatekeeper_endpoint: ParseResult, workspace_dir: str,
     _LOGGER.info('Succeed to retrieve the resource %s (status code = %d): %s',
                  res_resp.url, res_resp.status_code, tmp[:20])
     for elt in tmp:
+        this_uuid = elt['uuid']
+        if not this_uuid:
+            _LOGGER.warning('Ignoring an element without id or uuid: %s', elt)
+            continue
         if kind.name in elt:  # the resource is boxed
             elt = elt[kind.name]
         if all([elt['vendor'] == vendor, elt['name'] == name,
                 elt['version'] == version]):
-            return elt
+            return (this_uuid, elt)
     return None
 
 
 # pylint: disable=unsubscriptable-object
 def _complete_nsd_with_vnfds(gatekeeper_endpoint: ParseResult,
-                             workspace_dir: str, nsd: Dict[str, Any],
+                             workspace_dir: str, uuid: str,
+                             nsd: Dict[str, Any],
                              kchildren: Kind) -> FETCHTYPE:
     """Retrieve the vnfds mentioned in a nsd. Raise a
     InvalidResourceReferenceError exception if a vnfd is missing."""
-    _LOGGER.info('Fetching the inner vnfds of the %s nsd', nsd['name'])
+    _LOGGER.info('Fetching the inner vnfds of the %s nsd', uuid)
     acc = []  # List[Dict[str, Any]]
     for fun_desc in nsd['network_functions']:
-        vnfd = fetch_resource(gatekeeper_endpoint, workspace_dir, kchildren,
-                              fun_desc['vnf_vendor'], fun_desc['vnf_name'],
-                              fun_desc['vnf_version'])
+        if 'vnfr_id' in fun_desc:
+            vnfd = fetch_resource_by_uuid(gatekeeper_endpoint, workspace_dir,
+                                          kchildren, fun_desc['vnfr_id'])
+        else:
+            (_, vnfd) = fetch_resource(gatekeeper_endpoint, workspace_dir,
+                                       kchildren, fun_desc['vnf_vendor'],
+                                       fun_desc['vnf_name'],
+                                       fun_desc['vnf_version'])
         if not vnfd:
             exc = InvalidResourceReferenceError(nsd, fun_desc['vnf_id'])
             _LOGGER.error('Error when retrieving a vnfd: %s', exc)
@@ -216,12 +228,12 @@ def fetch_resources(gatekeeper_endpoint: ParseResult, workspace_dir: str,
                     kind: Kind, vendor: str, name: str,
                     version: str) -> FETCHTYPE:
     """Fetch a main resource and its sub-elements"""
-    base = fetch_resource(gatekeeper_endpoint, workspace_dir, kind, vendor,
-                          name, version)
+    (uuid, base) = fetch_resource(gatekeeper_endpoint, workspace_dir, kind,
+                                  vendor, name, version)
     kchildren = _get_childrend_kind(kind)
     if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        base, kchildren)
+                                        uuid, base, kchildren)
     return base, []
 
 
@@ -235,5 +247,5 @@ def fetch_resources_by_uuid(gatekeeper_endpoint: ParseResult,
     kchildren = _get_childrend_kind(kind)
     if base and kchildren:
         return _complete_nsd_with_vnfds(gatekeeper_endpoint, workspace_dir,
-                                        base, kchildren)
+                                        uuid, base, kchildren)
     return base, []

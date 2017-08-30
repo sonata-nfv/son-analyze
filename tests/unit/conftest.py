@@ -121,7 +121,7 @@ def sonata_demo_mock(
     for elt in files:
         org = elt[3]
         urls = compute_urls(elt[0], elt[2], org)
-        boxed = [{elt[1]: org}]
+        boxed = [{elt[1]: org, 'uuid': elt[2]}]
         result.append((urls[0], boxed))
         result.append((urls[1], org))
     _LOGGER.debug('List of urls in the sonata demo mock: %s',
@@ -219,5 +219,5 @@ def tmp_workspace_dir() -> Iterable[str]:
     with open(os.path.join(inner_dir, 'token.txt'), 'w') as data_file:
         data_file.write('0123456789')
         _LOGGER.debug('Created the temporary workspace %s', workspace_dir.name)
-    yield workspace_dir.name
+    yield os.path.join(workspace_dir.name, '.son-workspace')
     workspace_dir.cleanup()
