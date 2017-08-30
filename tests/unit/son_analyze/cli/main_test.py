@@ -71,7 +71,7 @@ def run_bg(request):
     request.addfinalizer(fin)
 
 
-@pytest.mark.skipif(os.getenv('JENKINS_URL') is None,
+@pytest.mark.skipif(os.getenv('JENKINS_URL') is not None,
                     reason="Failing under Jenkins")
 @pytest.mark.usefixtures("run_bg")
 def test_run(docker_cli) -> None:  # pylint: disable=redefined-outer-name
