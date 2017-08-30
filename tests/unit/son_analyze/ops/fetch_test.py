@@ -41,8 +41,7 @@ def test_tmp_workspace_dir(caplog, tmp_workspace_dir: str) -> None:
         os.path.isdir(tmp_workspace_dir),
         os.access(tmp_workspace_dir, os.R_OK),
     ])
-    token_path = os.path.join(tmp_workspace_dir, '.son-workspace', 'platforms',
-                              'token.txt')
+    token_path = os.path.join(tmp_workspace_dir, 'platforms', 'token.txt')
     assert all([
         token_path,
         os.path.isfile(token_path),

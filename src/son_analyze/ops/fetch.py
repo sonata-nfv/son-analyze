@@ -61,7 +61,7 @@ class InvalidResourceReferenceError(FetchError):
 def _get_workspace_token(workspace_dir: str) -> str:
     """Retrieve the authentification token from the workspace"""
     _LOGGER.debug('Computing the Sonata workspace from: %s', workspace_dir)
-    path = os.path.join(workspace_dir, '.son-workspace', 'platforms',
+    path = os.path.join(workspace_dir, 'platforms',
                         'token.txt')
     if os.path.isfile(path) and os.access(path, os.R_OK):
         with open(path) as tkn:

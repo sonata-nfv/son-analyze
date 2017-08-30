@@ -219,5 +219,5 @@ def tmp_workspace_dir() -> Iterable[str]:
     with open(os.path.join(inner_dir, 'token.txt'), 'w') as data_file:
         data_file.write('0123456789')
         _LOGGER.debug('Created the temporary workspace %s', workspace_dir.name)
-    yield workspace_dir.name
+    yield os.path.join(workspace_dir.name, '.son-workspace')
     workspace_dir.cleanup()
