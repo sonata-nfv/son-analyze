@@ -179,7 +179,7 @@ def url_type(raw_url: str) -> urllib.parse.ParseResult:
 
 def fetch_func(args: Namespace) -> None:
     """Fetch data"""
-    fetch_cmd.fetch_cmd(args.endpoint, args.dworkspace_dir, args.kind,
+    fetch_cmd.fetch_cmd(args.endpoint, args.son_workspace, args.kind,
                         args.target)
     sys.exit(0)
 
