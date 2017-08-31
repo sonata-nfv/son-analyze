@@ -45,6 +45,6 @@ RUN cd /son-analyze \
 
 USER $NB_USER
 
-RUN cp /son-analyze/son-scikit/src/son_scikit/resources/* /home/jovyan/work/
+RUN cp -r /son-analyze/son-scikit/src/son_scikit/resources/* /home/jovyan/work/
 
 WORKDIR /home/jovyan/work
